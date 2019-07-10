@@ -1,0 +1,57 @@
+2019-07-10 15:58:13,874 - elsapy.elsclient - INFO - Module loaded.
+2019-07-10 15:58:13,876 - elsapy.elsentity - INFO - Module loaded.
+2019-07-10 15:58:13,876 - elsapy.elsdoc - INFO - Module loaded.
+2019-07-10 15:58:35,516 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/0304380095900462
+2019-07-10 15:58:37,221 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/0304380095900462
+2019-07-10 15:58:37,223 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/0304380095900462 to file
+2019-07-10 15:59:12,255 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/0304380095900462
+2019-07-10 15:59:13,777 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/0304380095900462
+2019-07-10 15:59:13,780 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/0304380095900462 to file
+2019-07-10 16:03:14,153 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/0304380095900454
+2019-07-10 16:03:16,158 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/0304380095900454
+2019-07-10 16:03:16,160 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/0304380095900454 to file
+2019-07-10 16:04:52,832 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:04:56,070 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:04:56,076 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003917 to file
+2019-07-10 16:05:43,775 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:05:46,555 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:05:46,561 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003917 to file
+2019-07-10 16:06:44,017 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:06:46,556 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:06:46,561 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003917 to file
+2019-07-10 16:08:01,357 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:08:04,007 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:08:04,013 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003917 to file
+2019-07-10 16:08:20,866 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:08:23,974 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:08:23,980 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003917 to file
+2019-07-10 16:09:47,270 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:09:50,911 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003917
+2019-07-10 16:09:50,917 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003917 to file
+2019-07-10 16:10:17,133 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:10:18,492 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:10:18,495 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003152 to file
+2019-07-10 16:11:49,454 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:11:51,324 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:11:51,326 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003152 to file
+2019-07-10 16:13:15,162 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:13:17,030 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:13:17,032 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003152 to file
+2019-07-10 16:14:46,255 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S019126159690017X
+2019-07-10 16:14:48,286 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S019126159690017X
+2019-07-10 16:14:48,288 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S019126159690017X to file
+2019-07-10 16:16:21,559 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0191261513002208
+2019-07-10 16:16:24,735 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0191261513002208
+2019-07-10 16:16:24,750 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0191261513002208 to file
+2019-07-10 16:20:00,735 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:20:02,862 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0304380006003152
+2019-07-10 16:20:02,865 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0304380006003152 to file
+2019-07-10 16:20:28,251 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S030438000600367X
+2019-07-10 16:20:32,648 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S030438000600367X
+2019-07-10 16:20:32,652 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S030438000600367X to file
+2019-07-10 16:22:07,001 - elsapy.elsclient - INFO - Module loaded.
+2019-07-10 16:22:07,002 - elsapy.elsentity - INFO - Module loaded.
+2019-07-10 16:22:07,003 - elsapy.elsdoc - INFO - Module loaded.
+2019-07-10 16:22:08,006 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/article/pii/S0191261513001999
+2019-07-10 16:22:11,260 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/article/pii/S0191261513001999
+2019-07-10 16:22:11,270 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/article/pii/S0191261513001999 to file
