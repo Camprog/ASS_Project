@@ -17,7 +17,10 @@ Quick start
 
 Cam Code :
 
-config.json 	==> ad your API Key in this json.
+First : config.json ==> ad your API Key in this json.
+Then, execute the code as shown below. The JSON file containing the information of the item requested in the "Article_EcMo_with_pii.py" code will be added to the data folder.
+
+
 
 For Ecological modeling:
 
