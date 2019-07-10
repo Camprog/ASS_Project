@@ -19,19 +19,21 @@ Cam Code :
 
 config.json 	==> ad your API Key in this json.
 
+For Ecological modeling:
+
  	PII_Eco_Mod.py: Extract the PII identifiers from the articles, modify the volume numbers in the "in range" to be analyzed as indicated in the code.
-  
-  Article_EcMo_with_pii.py: Enter your PII like this
-  
-  pii_doc = FullDoc(sd_pii = 'Your PII')
+
+	Article_EcMo_with_pii.py: Enter your PII like this pii_doc = FullDoc(sd_pii = 'Your PII')
   
   
   *************************
   
+For Research transport part B:
+  
   Same that EcMo.
   
 	PII_RTM_PART_B.py 
-  Article_RTM_PART_B_with_pii.py 	
+	Article_RTM_PART_B_with_pii.py 	
   
 	 	
   
