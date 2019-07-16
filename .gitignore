@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# emacs
+.*~
+
+# ASS
+ASS_project/data
+
 # Distribution / packaging
 .Python
 build/
@@ -37,7 +43,6 @@ pip-delete-this-directory.txt
 
 # OS
 .DS_Store
-
 
 # Unit test / coverage reports
 htmlcov/
