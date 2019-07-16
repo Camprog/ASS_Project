@@ -35,6 +35,10 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# OS
+.DS_Store
+
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
