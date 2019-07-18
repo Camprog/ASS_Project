@@ -6,7 +6,7 @@ from requests import HTTPError
 from sample import jasssScrap
 import requests
 from bs4 import BeautifulSoup
-
+from elsapy.elsdoc import FullDoc
 
 class ASSArticle:
 
@@ -214,3 +214,35 @@ class JasssArticle(ASSArticle):
         :return: the soup of the source retrieve by *beautifulsoup* 
         """
         return self.bs_article
+
+
+class ScienceDirectArticle(ASSArticle):
+    sd_article: FullDoc
+
+    def __init__(self, *args):
+        """
+        
+        """
+        self.sd_article = FullDoc(sd_pii=args[0])
+
+    def title(self):
+        """Gets the document's title"""
+        return self.data["coredata"]["title"]
+
+    def abstract(self):
+        """Gets the document's abstract"""
+        return self.data["coredata"]["dc:description"]
+
+    def text(self):
+        """Gets the document's text"""
+        return self.data["originalText"]
+
+    def keywords(self):
+        """Gets the document's Keywords"""
+        try:    
+            kw=self.data["coredata"]["dcterms:subject"]
+            KW_list = [item['$'] for item in kw]
+            return KW_list
+        except KeyError:
+            KW_list = ["No Keyword"]
+            return KW_list
