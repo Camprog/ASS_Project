@@ -1,11 +1,11 @@
 import re
 from abc import abstractmethod
 
-from requests import HTTPError
-
-from sample import jasssScrap
 import requests
 from bs4 import BeautifulSoup
+from requests import HTTPError
+
+from camass.ASS_Project.article_scrap import JasssScrap
 
 
 class ASSArticle:
@@ -19,7 +19,6 @@ class ASSArticle:
 
     def constructor(self, file):
         part = re.split(ASSArticle.ass_start_balise, file)
-
 
     @abstractmethod
     def title(self):
@@ -73,20 +72,20 @@ class JasssArticle(ASSArticle):
         :param url url:
         """
         if len(args) == 0:
-            req = requests.get(kwargs.get('url', jasssScrap.get_latest_url()))
+            req = requests.get(kwargs.get('url', JasssScrap.get_latest_url()))
             if req.status_code == requests.codes.ok:
                 self.url = req.url
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = jasssScrap.base_url + str(args[0]) + jasssScrap.separator + str(args[1]) + jasssScrap.separator
-            req = requests.get(basic_url + str(args[2]) + jasssScrap.html)
+            basic_url = JasssScrap.base_url + str(args[0]) + JasssScrap.separator + str(args[1]) + JasssScrap.separator
+            req = requests.get(basic_url + str(args[2]) + JasssScrap.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
-                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + jasssScrap.html),
+                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + JasssScrap.html),
                                                 'html5lib')
 
     def __repr__(self):
@@ -174,19 +173,19 @@ class JasssArticle(ASSArticle):
         :param string tag: the tag to find in the soup
         :return: a string representation of the content of the tag
         """
-        m_name = jasssScrap.jasss_meta_name
-        m_content = jasssScrap.jasss_meta_content
-        if self.bs_article.find_next(jasssScrap.jasss_meta_tag,
-                                     {jasssScrap.jasss_meta_name.upper(): "title"}):
-            m_name = jasssScrap.jasss_meta_name.upper()
-            m_content = jasssScrap.jasss_meta_content.upper()
+        m_name = JasssScrap.jasss_meta_name
+        m_content = JasssScrap.jasss_meta_content
+        if self.bs_article.find_next(JasssScrap.jasss_meta_tag,
+                                     {JasssScrap.jasss_meta_name.upper(): "title"}):
+            m_name = JasssScrap.jasss_meta_name.upper()
+            m_content = JasssScrap.jasss_meta_content.upper()
 
-        if isinstance(jasssScrap.meta[tag], str):
-            meta_context = self.bs_article.find(jasssScrap.jasss_meta_tag,
-                                                {m_name: jasssScrap.meta[tag]})
+        if isinstance(JasssScrap.meta[tag], str):
+            meta_context = self.bs_article.find(JasssScrap.jasss_meta_tag,
+                                                {m_name: JasssScrap.meta[tag]})
         else:
-            for tg in jasssScrap.meta[tag]:
-                meta_context = self.bs_article.find(jasssScrap.jasss_meta_tag, {m_name: tg})
+            for tg in JasssScrap.meta[tag]:
+                meta_context = self.bs_article.find(JasssScrap.jasss_meta_tag, {m_name: tg})
                 if meta_context is not None:
                     break
         return meta_context[m_content]
@@ -201,7 +200,7 @@ class JasssArticle(ASSArticle):
         balise: str = "p"
         if tag == "doi":
             balise = "span"
-        result = self.bs_article.find(balise, {'class': jasssScrap.art[tag]})
+        result = self.bs_article.find(balise, {'class': JasssScrap.art[tag]})
         if result is None:
             return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
         if tag == "doi":

@@ -4,8 +4,9 @@ from urllib import request
 import bs4
 import re
 
-from sample import JasssArticle
 from itertools import product
+
+from camass.ASS_Project.article_scrap.JasssArticle import JasssArticle
 
 slash_conversion = "_Alt47_"
 
