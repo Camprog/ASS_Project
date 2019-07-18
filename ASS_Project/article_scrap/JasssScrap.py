@@ -6,11 +6,7 @@ import re
 
 from itertools import product
 
-<<<<<<< HEAD
-import JasssArticle
-=======
-import camass.ASS_Project.article_scrap.JasssArticle
->>>>>>> ba9bca356d0acb3c9edb5ee6cc1a88ce4901392f
+from .JasssArticle import JasssArticle
 
 slash_conversion = "_Alt47_"
 
@@ -40,7 +36,7 @@ def visit_article(volume=1, number=1, article=1):
     :param int article:
     :return: an html page that represents requested article
     """
-    return camass.ASS_Project.article_scrap.JasssArticle.JasssArticle(volume, number, article)
+    return JasssArticle(volume, number, article)
 
 
 def visit_articles(to_volume=(1, 1), to_number=(1, 4), to_article=(1, 1)):

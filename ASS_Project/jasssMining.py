@@ -12,8 +12,8 @@ import os
 
 from pathlib import Path
 
-from camass.ASS_Project.article_scrap.JasssArticle import JasssArticle
-from camass.ASS_Project.article_scrap.JasssScrap import doi_converter
+from article_scrap import JasssArticle
+from article_scrap.JasssScrap import doi_converter
 
 url_JASSS = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 req_text = request.urlopen(url=url_JASSS).read()

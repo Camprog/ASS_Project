@@ -1,15 +1,13 @@
-import re
+import json
 from abc import abstractmethod
 
 import requests
+
 from bs4 import BeautifulSoup
+from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
-from camass.ASS_Project.article_scrap import JasssScrap
-
-from elsapy.elsdoc import FullDoc
-
-import json
+from . import JasssScrap
 
 
 class ASSArticle:
