@@ -42,7 +42,7 @@ url_RTM = ""
 list_pii_RTM = []
 
 #Loop that modifies in the url the volume numbers (vol) and the issue numbers (iss), in range (first desired volume, last desired volume, step)
-for volume in range(47,50,1) :
+for volume in range(100,101,1) :
     
     #URL of Ec. Mod. where iterate volume and issue by volume 
     for issue in range (1,2,1):

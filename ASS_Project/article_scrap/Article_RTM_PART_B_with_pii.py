@@ -45,12 +45,36 @@ print ("List_PII type",type(List_PII))
 for i in List_PII:
     
     pii_doc = FullDoc(sd_pii = i)
-        
+    print (pii_doc.read(client))
+    print(pii_doc.title)
     if pii_doc.read(client):
         #print ("\n\n","Title : \n\n ", pii_doc.title,"\n\n")
         pii_doc.write()   
     else:
         print ("Read document failed.")
+    
+    
+    
+        
+    Keywords = pii_doc.data["coredata"]["dcterms:subject"]
+    KW_list = [item['$'] for item in Keywords]
+    print (KW_list)
+    """
+    
+
+    
+    #for i in pii_doc.data["coredata"]["dcterms:subject"][i]["$"]:
+        
+#    for i in (pii_doc.data["coredata"]["dcterms:subject"][]["$"]):
+    #for i in pii_doc.data["coredata"]["dcterms:subject"]:
+       # for j in i:
+       #     keyword = j[0]["$"]
+       #     print(keyword)
+        
+        #keywords = (pii_doc.data["coredata"]["dcterms:subject"][i]["$"])
+        #print (Keywords)
+        
+
 
     Abstract = pii_doc.data["coredata"]["dc:description"]
     Revue = pii_doc.data["coredata"]["prism:publicationName"]
@@ -62,17 +86,19 @@ for i in List_PII:
     
     with open("/Users/camillelamy/Dossier_Python/ASS-Project/Code_Cam/Article_RTM_part_B/"+str(re.sub(" ","_",pii_doc.title))+".txt",'w') as outfile:  
         json.dump(Article, outfile)
+    
 
-
-## Abstract, keyword, Revue, Author and texte variable, go to searsh information in data folder. 
+    Abtract, keyword, Revue, Author and texte variable, go to searsh information in data folder. 
     
     
     
 #Abstract = pii_doc.data["coredata"]["dc:description"]
-"""Keywords = (pii_doc.data["coredata"]["dcterms:subject"][0]["$"],
-            pii_doc.data["coredata"]["dcterms:subject"][1]["$"],
-            pii_doc.data["coredata"]["dcterms:subject"][2]["$"],
-            pii_doc.data["coredata"]["dcterms:subject"][4]["$"],)
+Keywords = (pii_doc.data["coredata"]["dcterms:subject"][0]["$"],
+            pii_doc.data["coredata"]["dcterms:subject"][1]["$"])
+            #pii_doc.data["coredata"]["dcterms:subject"][2]["$"],
+            #pii_doc.data["coredata"]["dcterms:subject"][4]["$"],)
+
+
 Revue = pii_doc.data["coredata"]["prism:publicationName"]
 Author = (pii_doc.data["coredata"]["dc:creator"][0]["$"],
           pii_doc.data["coredata"]["dc:creator"][1]["$"],
@@ -83,8 +109,6 @@ Text = pii_doc.data["originalText"]
 
 print ("Revue: \n\n ",Revue,"\n\n")
 print ("Keywords: \n\n ",Keywords,"\n\n")
-print ("Author:\n\n",Author,"\n\n")"""
-
-
-
+print ("Author:\n\n",Author,"\n\n")
+"""
 #itérer pour Keyword et Author
