@@ -10,6 +10,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elsdoc import FullDoc
 import json
 import re
+import ScienceDirectArticle
     
 ## Load configuration
 con_file = open("config.json")
@@ -31,7 +32,9 @@ print ("List_PII",List_PII_EM)
 print ("List_PII type",type(List_PII_EM)) 
 
 for i in List_PII_EM:
-    pii_doc = FullDoc(sd_pii = i)
+    my_article = ScienceDirectArticle(FullDoc(sd_pii = i))
+    
+    
     
     if pii_doc.read(client):
         #print ("\n\n","Title : \n\n ", pii_doc.title,"\n\n")

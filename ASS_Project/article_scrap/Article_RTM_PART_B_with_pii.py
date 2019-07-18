@@ -55,10 +55,12 @@ for i in List_PII:
     
     
     
-        
-    Keywords = pii_doc.data["coredata"]["dcterms:subject"]
-    KW_list = [item['$'] for item in Keywords]
-    print (KW_list)
+    try:    
+        Keywords = pii_doc.data["coredata"]["dcterms:subject"]
+        KW_list = [item['$'] for item in Keywords]
+        print (KW_list)
+    except KeyError:
+        pass
     """
     
 
