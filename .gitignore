@@ -10,8 +10,7 @@ __pycache__/
 .*~
 
 # ASS
-ASS_project/data
-*/data
+**/data
 
 # Distribution / packaging
 .Python
