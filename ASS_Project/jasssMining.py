@@ -10,10 +10,10 @@ from urllib import request
 import bs4
 import os
 
-from sample.JasssArticle import JasssArticle, ASSArticle
-from sample.jasssScrap import doi_converter
-
 from pathlib import Path
+
+from camass.ASS_Project.article_scrap.JasssArticle import JasssArticle
+from camass.ASS_Project.article_scrap.JasssScrap import doi_converter
 
 url_JASSS = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 req_text = request.urlopen(url=url_JASSS).read()
@@ -22,7 +22,7 @@ page = bs4.BeautifulSoup(req_text, "lxml")
 
 itr: int = 0
 
-tp = Path(os.getcwd()+"/../result/")
+tp = Path(os.getcwd()+"/data/")
 
 for gen in page.findAll("p", {'class': 'item'}):
     itr += 1
@@ -37,13 +37,4 @@ for gen in page.findAll("p", {'class': 'item'}):
     print(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
-    file = open(res_file, "w")
-
-    file.write(ASSArticle.ass_start_balise+ASSArticle.title())
-    file.write(article.title())
-    file.write(ASSArticle.ass_end_balise)
-
-    file.write("<KEYWORD : " + ";".join(article.keywords()) + ">")
-    file.writelines("<ABSTRACT : " + article.abstract() + ">")
-    file.writelines("<TEXT :  " + article.text() + ">")
-    file.close()
+    article.save(res_file)

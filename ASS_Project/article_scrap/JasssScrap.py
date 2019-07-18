@@ -6,7 +6,11 @@ import re
 
 from itertools import product
 
+<<<<<<< HEAD
 import JasssArticle
+=======
+import camass.ASS_Project.article_scrap.JasssArticle
+>>>>>>> ba9bca356d0acb3c9edb5ee6cc1a88ce4901392f
 
 slash_conversion = "_Alt47_"
 
@@ -36,10 +40,10 @@ def visit_article(volume=1, number=1, article=1):
     :param int article:
     :return: an html page that represents requested article
     """
-    return JasssArticle(volume, number, article)
+    return camass.ASS_Project.article_scrap.JasssArticle.JasssArticle(volume, number, article)
 
 
-def visit_articles(to_volume=1, to_number=4, to_article=1):
+def visit_articles(to_volume=(1, 1), to_number=(1, 4), to_article=(1, 1)):
     """Retrieve a collection of articles from 1 to args volume, issue and article found in JASSS
 
     :param int to_volume: the max number of volume; between 1 and ongoing number of volume
@@ -48,7 +52,9 @@ def visit_articles(to_volume=1, to_number=4, to_article=1):
     :return: a tuple made of html pages
     """
     return [visit_article(x, y, z) for x, y, z in
-            product(range(to_volume), range(to_number), range(to_article))]
+            product(max(1, range(to_volume[0]), to_volume[1]),
+                    range(max(1, to_number[0]), min(4, to_number[1])),
+                    range(max(1, to_article[0])), to_article[1])]
 
 
 def get_latest_url():
@@ -89,7 +95,7 @@ def doi_converter(article_doi):
 def clean_text(text):
     """
 
-    :return:
+    :return: A clean version of the content of the article
     """
-    intro_split = re.split('\n introduction \n', text)
+    intro_split = re.split('\nintroduction\n', text, re.IGNORECASE)
     print(intro_split)

@@ -1,6 +1,7 @@
 import re
 from abc import abstractmethod
 
+import requests
 from bs4 import BeautifulSoup
 from requests import HTTPError
 
@@ -8,49 +9,50 @@ import JasssScrap
 
 from elsapy.elsdoc import FullDoc
 
-class ASSArticle:
+import json
 
-    ass_start_balise: str = "<|"
-    ass_end_balise = "|>"
+
+class ASSArticle:
 
     title_tag = "TITLE"
     abstract_tag = "ABSTRACT"
-    keywords = "KEYWORDS"
+    keywords_tag = "KEYWORDS"
+    text_tag = "CONTENT"
 
-    def constructor(self, file):
-        part = re.split(ASSArticle.ass_start_balise, file)
+    def __init__(self, file):
+        json_content = json.load(file)
+        self._title = json_content[self.title_tag]
+        self._abstract = json_content[self.abstract_tag]
+        self._keywords = json_content[self.keywords_tag]
+        self._content = json_content[self.text_tag]
 
     @abstractmethod
     def title(self):
-        pass
+        return self._title
 
     @abstractmethod
     def abstract(self):
-        pass
+        return self._abstract
 
     @abstractmethod
     def keywords(self):
-        pass
+        return self._keywords
 
     @abstractmethod
     def text(self):
-        pass
+        return self._content
 
     def save(self, res_file):
         file = open(res_file, "w")
 
-        file.write(ASSArticle.ass_start_balise + ASSArticle.title_tag)
-        file.write(self.title())
-        file.write(ASSArticle.ass_end_balise)
-        file.write(ASSArticle.ass_start_balise + ASSArticle.keywords)
-        file.write(self.keywords())
-        file.write(ASSArticle.ass_end_balise)
-        file.write(ASSArticle.ass_start_balise + ASSArticle.abstract_tag)
-        file.write(self.abstract())
-        file.write(ASSArticle.ass_end_balise)
-        file.write(ASSArticle.ass_start_balise + ASSArticle.text_tag)
-        file.write(self.text())
-        file.write(ASSArticle.ass_end_balise)
+        file.write(json.dumps(
+            {
+                self.title_tag: self.title(),
+                self.abstract_tag: self.abstract(),
+                self.keywords_tag: self.keywords(),
+                self.text_tag:  self.text()
+            }
+        ))
 
         file.close()
 
