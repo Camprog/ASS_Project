@@ -32,6 +32,7 @@ print ("List_PII",List_PII_EM)
 print ("List_PII type",type(List_PII_EM)) 
 
 for i in List_PII_EM:
+    
     my_article = ScienceDirectArticle(FullDoc(sd_pii = i))
     
     

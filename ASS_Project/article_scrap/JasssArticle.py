@@ -4,7 +4,7 @@ from abc import abstractmethod
 from bs4 import BeautifulSoup
 from requests import HTTPError
 
-from camass.ASS_Project.article_scrap import JasssScrap
+import JasssScrap
 
 from elsapy.elsdoc import FullDoc
 
@@ -218,12 +218,10 @@ class JasssArticle(ASSArticle):
 class ScienceDirectArticle(ASSArticle):
     sd_article: FullDoc
 
-    def __init__(self, *args):
-        """
-        
-        """
+    
+    def __init__(self, *args):       
         self.sd_article = FullDoc(sd_pii=args[0])
-
+            
     def title(self):
         """Gets the document's title"""
         return self.data["coredata"]["title"]
@@ -245,3 +243,8 @@ class ScienceDirectArticle(ASSArticle):
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
+    
+
+""" 
+
+"""
