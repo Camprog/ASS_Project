@@ -47,7 +47,7 @@ for i in List_PII_EM:
     Article = str(Revue)+str(pii_doc.title) + str(Abstract)+ str(Text)
     print (Article)
     
-    with open("/Users/camillelamy/Dossier_Python/ASS-Project/Code_Cam/Article_EM/"+str(re.sub(" ","_",pii_doc.title))+".txt",'w') as outfile:  
+    with open("/Users/camillelamy/Dossier_Python/ASS_Project/ASS_Project/article_scrap/data/"+str(re.sub(" ","_",pii_doc.title))+".txt",'w') as outfile:  
         json.dump(Article, outfile)    
 
     print (Article)

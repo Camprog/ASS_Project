@@ -84,7 +84,7 @@ for i in List_PII:
     Article = str(Revue)+str(pii_doc.title) + str(Abstract)+ str(Text)
     print (Article)
     
-    with open("/Users/camillelamy/Dossier_Python/ASS-Project/Code_Cam/Article_RTM_part_B/"+str(re.sub(" ","_",pii_doc.title))+".txt",'w') as outfile:  
+    with open("/Users/camillelamy/Dossier_Python/ASS_Project/ASS_Project/article_scrap/data/"+str(re.sub(" ","_",pii_doc.title))+".txt",'w') as outfile:  
         json.dump(Article, outfile)
     
 
