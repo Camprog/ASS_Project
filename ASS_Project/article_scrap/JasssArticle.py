@@ -37,6 +37,24 @@ class ASSArticle:
     def text(self):
         pass
 
+    def save(self, res_file):
+        file = open(res_file, "w")
+
+        file.write(ASSArticle.ass_start_balise + ASSArticle.title_tag)
+        file.write(self.title())
+        file.write(ASSArticle.ass_end_balise)
+        file.write(ASSArticle.ass_start_balise + ASSArticle.keywords)
+        file.write(self.keywords())
+        file.write(ASSArticle.ass_end_balise)
+        file.write(ASSArticle.ass_start_balise + ASSArticle.abstract_tag)
+        file.write(self.abstract())
+        file.write(ASSArticle.ass_end_balise)
+        file.write(ASSArticle.ass_start_balise + ASSArticle.text_tag)
+        file.write(self.text())
+        file.write(ASSArticle.ass_end_balise)
+
+        file.close()
+
 
 class JasssArticle(ASSArticle):
     bs_article: BeautifulSoup
