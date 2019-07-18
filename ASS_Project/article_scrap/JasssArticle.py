@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from requests import HTTPError
 
-import JasssScrap
+from camass.ASS_Project.article_scrap import JasssScrap
 
 from elsapy.elsdoc import FullDoc
 
@@ -64,12 +64,10 @@ class JasssArticle(ASSArticle):
         # args -- tuple of anonymous arguments
         # kwargs -- dictionary of named arguments
         """init article from an url
-
         *args
         :param int volume:
         :param int issue:
         :param int article:
-
         **kwargs
         :param url url:
         """
@@ -100,7 +98,6 @@ class JasssArticle(ASSArticle):
     def keywords(self):
         """
         Get the key worlds from an article
-
         :param html bs_article:
         :return: a tuple made of key worlds
         """
@@ -113,7 +110,6 @@ class JasssArticle(ASSArticle):
     def authors(self):
         """
         Retrieve the authors of the article
-
         :param html bs_article:
         :return: a tuple of authors
         """
@@ -142,7 +138,6 @@ class JasssArticle(ASSArticle):
 
     def text(self):
         """
-
         :return: The plain text of the article
         """
         body = self.bs_article.findAll("article")
@@ -171,7 +166,6 @@ class JasssArticle(ASSArticle):
     def get_meta_content_with_tag(self, tag="title"):
         """
         Retrieve the content of a tag as define by *beautifulsoup*
-
         :param string tag: the tag to find in the soup
         :return: a string representation of the content of the tag
         """
@@ -195,7 +189,6 @@ class JasssArticle(ASSArticle):
     def get_art_content_with_tag(self, tag="title"):
         """
         Retrieve the content of a tag define in the *art* section of JASSS article pages
-
         :param tag:
         :return: a string representation of the content of the tag
         """
@@ -220,10 +213,12 @@ class JasssArticle(ASSArticle):
 class ScienceDirectArticle(ASSArticle):
     sd_article: FullDoc
 
-    
-    def __init__(self, *args):       
+    def __init__(self, *args):
+        """
+        
+        """
         self.sd_article = FullDoc(sd_pii=args[0])
-            
+
     def title(self):
         """Gets the document's title"""
         return self.data["coredata"]["title"]
@@ -245,8 +240,3 @@ class ScienceDirectArticle(ASSArticle):
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
-    
-
-""" 
-
-"""
