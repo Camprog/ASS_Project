@@ -27,7 +27,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elsdoc import FullDoc
 import json
 import re
-from JasssArticle import ScienceDirectArticle as SD_A
+from ass_article import ScienceDirectArticle as SD_A
 
 
 
@@ -55,27 +55,25 @@ List_PII = re.sub("[^\w]", " ",  pii_code).split()
 print ("List_PII",List_PII)
 print ("List_PII type",type(List_PII)) 
 
-
-for i in List_PII:
-    
-    pii_doc = FullDoc(sd_pii = i)
-    print (pii_doc.read(client))
-    print(pii_doc.title)
-    if pii_doc.read(client):
-        #print ("\n\n","Title : \n\n ", pii_doc.title,"\n\n")
-        pii_doc.write()   
-    else:
-        print ("Read document failed.")
-    
-    Abstract = pii_doc.data["coredata"]["dc:description"]
-    print (Abstract)
-"""    
+#
+#for i in List_PII:
+#    
+#    pii_doc = FullDoc(sd_pii = i)
+#    print (pii_doc.read(client))
+#    print(pii_doc.title)
+#    if pii_doc.read(client):
+#        pii_doc.write()   
+#    else:
+#        print ("Read document failed.")
+#    
+#    Abstract = pii_doc.data["coredata"]["dc:description"]
+#    print (Abstract)
+   
 for i in List_PII:
     
     pii_doc = SD_A(sd_pii = i)
     if pii_doc.read(client):
         print ("pii_doc.title: ", pii_doc.title)
-        #print ("\n\n","Title : \n\n ", pii_doc.title,"\n\n")
         pii_doc.write()   
     else:
         print ("Read document failed.")   
@@ -129,7 +127,7 @@ for i in List_PII:
 #Text = pii_doc.data["originalText"]
 
 
-"""
+
 print ("Revue: \n\n ",Revue,"\n\n")
 print ("Keywords: \n\n ",Keywords,"\n\n")
 print ("Author:\n\n",Author,"\n\n")
@@ -186,4 +184,3 @@ print ("Author:\n\n",Author,"\n\n")
 #    print ("pii_doc.title: ", pii_doc.title)
 #    pii_doc.write()   
 #else:
-#    print ("Read document failed.")
