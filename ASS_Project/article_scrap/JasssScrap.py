@@ -6,7 +6,7 @@ import re
 
 from itertools import product
 
-from .JasssArticle import JasssArticle
+import JasssArticle
 
 slash_conversion = "_Alt47_"
 

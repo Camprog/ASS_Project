@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
-from . import JasssScrap
+import JasssScrap
 
 
 class ASSArticle:

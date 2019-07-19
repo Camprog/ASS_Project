@@ -18,7 +18,7 @@ from elsapy.elsclient import ElsClient
 from elsapy.elsdoc import FullDoc
 import json
 import re
-import 
+
     
 ## Load configuration
 con_file = open("config.json")
