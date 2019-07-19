@@ -33,7 +33,7 @@ print ("List_PII type",type(List_PII))
 
 for i in List_PII:
     
-    pii_doc = SD_A( sd_pii = i)
+    pii_doc = SD_A.args
     if pii_doc.read(client):
         #print ("\n\n","Title : \n\n ", pii_doc.title,"\n\n")
         pii_doc.write()   
