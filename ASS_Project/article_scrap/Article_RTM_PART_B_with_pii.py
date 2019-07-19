@@ -18,10 +18,11 @@ from elsapy.elsclient import ElsClient
 from elsapy.elsdoc import FullDoc
 import json
 import re
+import os
 
     
 ## Load configuration
-con_file = open("config.json")
+con_file = open(os.getcwd()+"/ASS_Project/article_scrap/config.json")
 config = json.load(con_file)
 con_file.close()
 
@@ -53,8 +54,11 @@ for i in List_PII:
         pii_doc.write()   
     else:
         print ("Read document failed.")
-    
-    
+    Abstract = pii_doc.data["coredata"]["dc:description"]
+    print (Abstract)
+    Revue = pii_doc.data["coredata"]["prism:publicationName"]
+    Text = pii_doc.data["originalText"]
+    print (Text)
     
     
     """

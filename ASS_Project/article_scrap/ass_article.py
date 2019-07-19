@@ -209,30 +209,34 @@ class JasssArticle(ASSArticle):
 
 
 class ScienceDirectArticle(ASSArticle):
-    sd_article: FullDoc
+    #sd_article: FullDoc
 
     def __init__(self, *args):
         """
         
         """
-        self.sd_article = FullDoc(sd_pii=args[0])
+        print(args[0])
+        self._sd_article = FullDoc(sd_pii=args[0])
+        if not self._sd_article.read(els_client=args[1]):
+            raise HTTPError
+            
 
     def title(self):
         """Gets the document's title"""
-        return self.data["coredata"]["title"]
+        return self._sd_article.title
 
     def abstract(self):
         """Gets the document's abstract"""
-        return self.data["coredata"]["dc:description"]
+        return self._sd_article.data["coredata"]["dc:description"]
 
     def text(self):
         """Gets the document's text"""
-        return self.data["originalText"]
+        return self._sd_article.data["originalText"]
 
     def keywords(self):
         """Gets the document's Keywords"""
         try:    
-            kw=self.data["coredata"]["dcterms:subject"]
+            kw=self._sd_article.data["coredata"]["dcterms:subject"]
             KW_list = [item['$'] for item in kw]
             return KW_list
         except KeyError:
