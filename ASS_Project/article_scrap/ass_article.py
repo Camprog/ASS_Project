@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
-import JasssScrap
+from ASS_Project.article_scrap import jasss_scrap_util
 
 
 class ASSArticle:
@@ -70,20 +70,20 @@ class JasssArticle(ASSArticle):
         :param url url:
         """
         if len(args) == 0:
-            req = requests.get(kwargs.get('url', JasssScrap.get_latest_url()))
+            req = requests.get(kwargs.get('url', jasss_scrap_util.get_latest_url()))
             if req.status_code == requests.codes.ok:
                 self.url = req.url
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = JasssScrap.base_url + str(args[0]) + JasssScrap.separator + str(args[1]) + JasssScrap.separator
-            req = requests.get(basic_url + str(args[2]) + JasssScrap.html)
+            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(args[1]) + jasss_scrap_util.separator
+            req = requests.get(basic_url + str(args[2]) + jasss_scrap_util.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
-                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + JasssScrap.html),
+                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
                                                 'html5lib')
 
     def __repr__(self):
@@ -167,19 +167,19 @@ class JasssArticle(ASSArticle):
         :param string tag: the tag to find in the soup
         :return: a string representation of the content of the tag
         """
-        m_name = JasssScrap.jasss_meta_name
-        m_content = JasssScrap.jasss_meta_content
-        if self.bs_article.find_next(JasssScrap.jasss_meta_tag,
-                                     {JasssScrap.jasss_meta_name.upper(): "title"}):
-            m_name = JasssScrap.jasss_meta_name.upper()
-            m_content = JasssScrap.jasss_meta_content.upper()
+        m_name = jasss_scrap_util.jasss_meta_name
+        m_content = jasss_scrap_util.jasss_meta_content
+        if self.bs_article.find_next(jasss_scrap_util.jasss_meta_tag,
+                                     {jasss_scrap_util.jasss_meta_name.upper(): "title"}):
+            m_name = jasss_scrap_util.jasss_meta_name.upper()
+            m_content = jasss_scrap_util.jasss_meta_content.upper()
 
-        if isinstance(JasssScrap.meta[tag], str):
-            meta_context = self.bs_article.find(JasssScrap.jasss_meta_tag,
-                                                {m_name: JasssScrap.meta[tag]})
+        if isinstance(jasss_scrap_util.meta[tag], str):
+            meta_context = self.bs_article.find(jasss_scrap_util.jasss_meta_tag,
+                                                {m_name: jasss_scrap_util.meta[tag]})
         else:
-            for tg in JasssScrap.meta[tag]:
-                meta_context = self.bs_article.find(JasssScrap.jasss_meta_tag, {m_name: tg})
+            for tg in jasss_scrap_util.meta[tag]:
+                meta_context = self.bs_article.find(jasss_scrap_util.jasss_meta_tag, {m_name: tg})
                 if meta_context is not None:
                     break
         return meta_context[m_content]
@@ -193,7 +193,7 @@ class JasssArticle(ASSArticle):
         balise: str = "p"
         if tag == "doi":
             balise = "span"
-        result = self.bs_article.find(balise, {'class': JasssScrap.art[tag]})
+        result = self.bs_article.find(balise, {'class': jasss_scrap_util.art[tag]})
         if result is None:
             return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
         if tag == "doi":
