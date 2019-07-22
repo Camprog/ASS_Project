@@ -24,11 +24,12 @@ Created on Thu Jul  4 09:57:57 2019
 """
 
 from elsapy.elsclient import ElsClient
-from elsapy.elsdoc import FullDoc
+#from elsapy.elsdoc import FullDoc
 import json
 import re
 from ASS_Project.article_scrap.ass_article import ScienceDirectArticle as SD_A
 import os
+from pathlib import Path
 
 
     
@@ -36,46 +37,35 @@ import os
 con_file = open(os.getcwd()+"/ASS_Project/article_scrap/config.json")
 config = json.load(con_file)
 con_file.close()
-
-## Initialize client
 client = ElsClient(config['apikey'])
-
 
 ## ScienceDirect (full-text) document example using PII
 
 with open(os.getcwd()+"/ASS_Project/article_scrap/list_pii_RTM.json") as json_file:  
     pii_code = json.load(json_file)
-#print ("Liste des codes PII :",pii_code)
-#print (type(pii_code))
 
 
 
 
 List_PII = re.sub("[^\w]", " ",  pii_code).split()
-#print ("List_PII",List_PII)
-#print ("List_PII type",type(List_PII)) 
 
-#
-#for i in List_PII:
-#    
-#    pii_doc = FullDoc(sd_pii = i)
-#    print (pii_doc.read(client))
-#    print(pii_doc.title)
-#    if pii_doc.read(client):
-#        pii_doc.write()   
-#    else:
-#        print ("Read document failed.")
-#    
-#    Abstract = pii_doc.data["coredata"]["dc:description"]
-#    print (Abstract)
+
    
 for i in List_PII:
     
     ass_doc = SD_A(i, client)
-    
-    print (ass_doc.abstract())
+    print ("\n\n\n",ass_doc.keywords(),"\n\n\n")
+    print (ass_doc.abstract(),"\n\n\n")
+    print (ass_doc.text(),"\n\n\n")
     print ("pii_doc.title: ", ass_doc.title())
-    ass_doc._sd_article.write()   
+    
+    
+    doss = Path(os.getcwd()+"/data/")
+    res_file = str(doss)+"/SD_article_"+str(ass_doc.title())+".txt"
+    ass_doc.save(res_file)
+    
+    ass_doc._sd_article.write()
+    
     
     
     """

@@ -32,7 +32,7 @@ for gen in page.findAll("p", {'class': 'item'}):
 
     if article.is_review():
         pass
-
+    
     res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
     print(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
