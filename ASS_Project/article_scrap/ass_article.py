@@ -8,6 +8,7 @@ from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
 from ASS_Project.article_scrap import jasss_scrap_util
+import re
 
 
 class ASSArticle:
@@ -223,7 +224,10 @@ class ScienceDirectArticle(ASSArticle):
 
     def title(self):
         """Gets the document's title"""
-        return self._sd_article.title
+        sd_title = re.sub("/","",self._sd_article.title)
+        return sd_title
+        
+            
 
     def abstract(self):
         """Gets the document's abstract"""

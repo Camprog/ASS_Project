@@ -30,6 +30,7 @@ import re
 from ASS_Project.article_scrap.ass_article import ScienceDirectArticle as SD_A
 import os
 from pathlib import Path
+import random
 
 
     
@@ -41,22 +42,26 @@ client = ElsClient(config['apikey'])
 
 ## ScienceDirect (full-text) document example using PII
 
-with open(os.getcwd()+"/ASS_Project/article_scrap/list_pii_RTM.json") as json_file:  
+with open(os.getcwd()+"/list_pii_EM.json") as json_file:  
     pii_code = json.load(json_file)
+    
+with open(os.getcwd()+"/list_pii_RTM.json") as json_file:  
+    pii_code_RTM = json.load(json_file)
 
 
-
-
+List_PII_RTM = re.sub("[^\w]", " ",  pii_code_RTM).split()
 List_PII = re.sub("[^\w]", " ",  pii_code).split()
 
-
+r=20
+list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
+print (list_rdm)
    
-for i in List_PII:
+for i in list_rdm:
     
     ass_doc = SD_A(i, client)
-    print ("\n\n\n",ass_doc.keywords(),"\n\n\n")
-    print (ass_doc.abstract(),"\n\n\n")
-    print (ass_doc.text(),"\n\n\n")
+#    print ("\n\n\n",ass_doc.keywords(),"\n\n\n")
+#    print (ass_doc.abstract(),"\n\n\n")
+#    print (ass_doc.text(),"\n\n\n")
     print ("pii_doc.title: ", ass_doc.title())
     
     
@@ -65,10 +70,10 @@ for i in List_PII:
     ass_doc.save(res_file)
     
     ass_doc._sd_article.write()
+#    
+#    
     
-    
-    
-    """
+
     
 
     
@@ -116,15 +121,15 @@ for i in List_PII:
 #Text = pii_doc.data["originalText"]
 
 
+#
+#print ("Revue: \n\n ",Revue,"\n\n")
+#print ("Keywords: \n\n ",Keywords,"\n\n")
+#print ("Author:\n\n",Author,"\n\n")
 
-print ("Revue: \n\n ",Revue,"\n\n")
-print ("Keywords: \n\n ",Keywords,"\n\n")
-print ("Author:\n\n",Author,"\n\n")
-"""
 #itérer pour Keyword et Author
-"""
 
-"""
+
+
 #from elsapy.elsclient import ElsClient
 #from JasssArticle import ScienceDirectArticle as SD_A
 #import json
