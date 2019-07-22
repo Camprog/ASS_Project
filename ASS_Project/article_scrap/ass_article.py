@@ -40,6 +40,9 @@ class ASSArticle:
     @abstractmethod
     def text(self):
         return self._content
+    
+    
+    #def doi(self):
 
     def save(self, res_file):
         file = open(res_file, "w")
@@ -221,20 +224,28 @@ class ScienceDirectArticle(ASSArticle):
         if not self._sd_article.read(els_client=args[1]):
             raise HTTPError
             
-
+    def doi(self):
+        """Gets the document's DOI"""
+        try:
+            doi = self._sd_article.data["coredata"]["dc:identifier"]
+            return doi
+        except KeyError:
+            doi = ["No DOI"]
+            return doi
+        
+        
     def title(self):
         """Gets the document's title"""
-        sd_title = re.sub("/","",self._sd_article.title)
+        sd_title = re.sub("/"," ",self._sd_article.title)
         return sd_title
         
-            
-
     def abstract(self):
         """Gets the document's abstract"""
         return self._sd_article.data["coredata"]["dc:description"]
 
     def text(self):
         """Gets the document's text"""
+        
         return self._sd_article.data["originalText"]
 
     def keywords(self):
