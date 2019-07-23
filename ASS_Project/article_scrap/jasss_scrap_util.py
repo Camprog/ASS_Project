@@ -3,8 +3,10 @@ from urllib import request
 
 import bs4
 import re
+import os
 
 from itertools import product
+
 
 slash_conversion = "_Alt47_"
 
@@ -39,6 +41,10 @@ meta = {"title": "DC.Title",
 #                     range(max(1, to_article[0])), to_article[1])
 
 
+
+    
+    
+    
 def get_latest_url():
     """Get the latest possible article from JASSS
     :return: the url reference to the page of the last to date JASSS article
@@ -78,3 +84,27 @@ def clean_text(text):
     """
     intro_split = re.split('\nintroduction\n', text, re.IGNORECASE)
     print(intro_split)
+    
+    
+def remove_gif(text):
+    """Remove GIF adresse in a texte"""
+    
+
+    
+    
+    clean_txt = re.sub(r'.IMAGE-DOWNSAMPLED','',text)
+    clean_txt = ''.join(character for character in text if ord(character) < 128)
+    clean_txt = re.sub(r'\n', '', text)
+    clean_txt = re.sub(r'https\S+','', text)
+    clean_txt = re.sub(r'http\S+','', text)
+    
+    #isImgUrl= "/(https?:\/\/.*\.(?:png|jpg|gif))/i"
+    
+    # remove new line and digits with regular expression
+#    clean_txt = re.sub('gif$','',text)    
+#    clean_txt = re.sub('^\w+\.+\/+jpg$','',text)
+        #clean_txt = re.sub()
+    return clean_txt
+#
+#    x = ['DOWNSAMPLED']
+#    for i in x:

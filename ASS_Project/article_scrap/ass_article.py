@@ -7,7 +7,10 @@ from bs4 import BeautifulSoup
 from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
+
 from ASS_Project.article_scrap import jasss_scrap_util
+from ASS_Project.article_scrap.jasss_scrap_util import doi_converter 
+from ASS_Project.article_scrap.jasss_scrap_util import remove_gif
 import re
 
 
@@ -228,10 +231,10 @@ class ScienceDirectArticle(ASSArticle):
         """Gets the document's DOI"""
         try:
             doi = self._sd_article.data["coredata"]["dc:identifier"]
-            return doi
+            return doi_converter(doi)
         except KeyError:
             doi = ["No DOI"]
-            return doi
+            return doi_converter(doi)
         
         
     def title(self):
@@ -246,7 +249,9 @@ class ScienceDirectArticle(ASSArticle):
     def text(self):
         """Gets the document's text"""
         
-        return self._sd_article.data["originalText"]
+        txt=self._sd_article.data["originalText"]
+        cln_txt = remove_gif(txt)
+        return cln_txt
 
     def keywords(self):
         """Gets the document's Keywords"""

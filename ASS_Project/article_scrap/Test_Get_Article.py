@@ -52,7 +52,7 @@ with open(os.getcwd()+"/list_pii_RTM.json") as json_file:
 List_PII_RTM = re.sub("[^\w]", " ",  pii_code_RTM).split()
 List_PII = re.sub("[^\w]", " ",  pii_code).split()
 
-r=20
+r=2
 list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
 print (list_rdm)
    
@@ -62,14 +62,14 @@ for i in list_rdm:
 #    print ("\n\n\n",ass_doc.keywords(),"\n\n\n")
 #    print (ass_doc.abstract(),"\n\n\n")
 #    print (ass_doc.text(),"\n\n\n")
-    print ("DOI :  ", ass_doc.doi())
+    print (ass_doc.doi())
     
     
-#    doss = Path(os.getcwd()+"/data/")
-#    res_file = str(doss)+"/SD_article_"+str(ass_doc.doi())+".txt"
-#    ass_doc.save(res_file)
-#    
-#    ass_doc._sd_article.write()
+    doss = Path(os.getcwd()+"/data/")
+    res_file = str(doss)+"/SD_article_"+str(ass_doc.doi())+".txt"
+    ass_doc.save(res_file)
+    
+    ass_doc._sd_article.write()
 #    
 #    
     
