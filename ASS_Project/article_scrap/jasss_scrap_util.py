@@ -92,11 +92,11 @@ def remove_gif(text):
 
     
     
-    clean_txt = re.sub(r'.IMAGE-DOWNSAMPLED','',text)
-    clean_txt = ''.join(character for character in text if ord(character) < 128)
-    clean_txt = re.sub(r'\n', '', text)
-    clean_txt = re.sub(r'https\S+','', text)
-    clean_txt = re.sub(r'http\S+','', text)
+    clean_txt = re.sub('DOWNSAMPLED','',text)
+    clean_txt_1 = ''.join(character for character in clean_txt if ord(character) < 128)
+    clean_txt_2 = re.sub(r'\n', '', clean_txt_1)
+    clean_txt_3 = re.sub(r'https\S+','', clean_txt_2)
+    clean_txt_4 = re.sub(r'http\S+','', clean_txt_3)
     
     #isImgUrl= "/(https?:\/\/.*\.(?:png|jpg|gif))/i"
     
@@ -104,7 +104,7 @@ def remove_gif(text):
 #    clean_txt = re.sub('gif$','',text)    
 #    clean_txt = re.sub('^\w+\.+\/+jpg$','',text)
         #clean_txt = re.sub()
-    return clean_txt
+    return clean_txt_4
 #
 #    x = ['DOWNSAMPLED']
 #    for i in x:
