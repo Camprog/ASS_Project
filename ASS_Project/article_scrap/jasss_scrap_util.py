@@ -87,24 +87,26 @@ def clean_text(text):
     
     
 def remove_gif(text):
-    """Remove GIF adresse in a texte"""
+    """Remove GIF adresse in a texte"""        
     
-
-    
-    
-    clean_txt = re.sub('DOWNSAMPLED','',text)
-    clean_txt_1 = ''.join(character for character in clean_txt if ord(character) < 128)
-    clean_txt_2 = re.sub(r'\n', '', clean_txt_1)
-    clean_txt_3 = re.sub(r'https\S+','', clean_txt_2)
-    clean_txt_4 = re.sub(r'http\S+','', clean_txt_3)
-    
+    clean_txt = ''.join(character for character in text if ord(character) < 128)
+    clean_txt = re.sub(r'\n', '', clean_txt)
+    clean_txt = re.sub(r'https\S+','', clean_txt)
+    clean_txt = re.sub(r'http\S+','', clean_txt)
+    clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
+    clean_txt = re.sub(r'(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
+    clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)','',clean_txt)
+    print(type(clean_txt))
     #isImgUrl= "/(https?:\/\/.*\.(?:png|jpg|gif))/i"
-    
     # remove new line and digits with regular expression
 #    clean_txt = re.sub('gif$','',text)    
 #    clean_txt = re.sub('^\w+\.+\/+jpg$','',text)
         #clean_txt = re.sub()
-    return clean_txt_4
-#
-#    x = ['DOWNSAMPLED']
+    return clean_txt
+
+
+#def remove_word(text):
+#    x = [r'DOWNSAMPLED',r'IMAGE-HIGH-RES']
 #    for i in x:
+#        clean_txt = re.sub(i,'',text)
+#        return clean_txt
