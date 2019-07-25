@@ -11,7 +11,6 @@ from ASS_Project.article_scrap import jasss_scrap_util
 
 
 class ASSArticle:
-
     title_tag = "TITLE"
     abstract_tag = "ABSTRACT"
     keywords_tag = "KEYWORDS"
@@ -48,8 +47,10 @@ class ASSArticle:
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag:  self.text()
-            }
+                self.text_tag: self.text()
+            },
+            ensure_ascii=False,
+            indent=0
         ))
 
         file.close()
@@ -77,14 +78,16 @@ class JasssArticle(ASSArticle):
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(args[1]) + jasss_scrap_util.separator
+            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(
+                args[1]) + jasss_scrap_util.separator
             req = requests.get(basic_url + str(args[2]) + jasss_scrap_util.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
-                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
-                                                'html5lib')
+                self.bs_article = BeautifulSoup(
+                    requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
+                    'html5lib')
 
     def __repr__(self):
         return self.url
@@ -231,8 +234,8 @@ class ScienceDirectArticle(ASSArticle):
 
     def keywords(self):
         """Gets the document's Keywords"""
-        try:    
-            kw=self.data["coredata"]["dcterms:subject"]
+        try:
+            kw = self.data["coredata"]["dcterms:subject"]
             KW_list = [item['$'] for item in kw]
             return KW_list
         except KeyError:

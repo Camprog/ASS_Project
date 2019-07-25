@@ -38,3 +38,4 @@ for gen in page.findAll("p", {'class': 'item'}):
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
     article.save(res_file)
+    input("Type 'enter' button to continue")
