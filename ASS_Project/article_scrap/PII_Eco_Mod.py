@@ -44,8 +44,8 @@ url_Eco = ""
 list_pii = []
 
 #Loop that modifies in the url the volume numbers (vol) and the issue numbers (iss), in range (first desired volume, last desired volume, step)
-for volume in range(200,201,1) :
-    for issue in range (1,2,1):
+for volume in range(125,408,1) :
+    for issue in range (1,3,1):
         #URL of Ec. Mod. where iterate volume and issue by volume 
         url_Eco = "https://www.sciencedirect.com/journal/ecological-modelling/vol/{vol}/issue/{iss}".format(**{
                                                                                                             'vol':volume,

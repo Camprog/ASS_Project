@@ -7,10 +7,15 @@ from bs4 import BeautifulSoup
 from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
+
 from ASS_Project.article_scrap import jasss_scrap_util
+from ASS_Project.article_scrap.jasss_scrap_util import doi_converter 
+from ASS_Project.article_scrap.jasss_scrap_util import remove_gif
+import re
 
 
 class ASSArticle:
+
     title_tag = "TITLE"
     abstract_tag = "ABSTRACT"
     keywords_tag = "KEYWORDS"
@@ -212,30 +217,47 @@ class JasssArticle(ASSArticle):
 
 
 class ScienceDirectArticle(ASSArticle):
-    sd_article: FullDoc
+    #sd_article: FullDoc
 
     def __init__(self, *args):
         """
         
         """
-        self.sd_article = FullDoc(sd_pii=args[0])
-
+        print(args[0])
+        self._sd_article = FullDoc(sd_pii=args[0])
+        if not self._sd_article.read(els_client=args[1]):
+            raise HTTPError
+            
+    def doi(self):
+        """Gets the document's DOI"""
+        try:
+            doi = self._sd_article.data["coredata"]["dc:identifier"]
+            return doi_converter(doi)
+        except KeyError:
+            doi = ["No DOI"]
+            return doi_converter(doi)
+        
+        
     def title(self):
         """Gets the document's title"""
-        return self.data["coredata"]["title"]
-
+        sd_title = re.sub("/"," ",self._sd_article.title)
+        return sd_title
+        
     def abstract(self):
         """Gets the document's abstract"""
-        return self.data["coredata"]["dc:description"]
+        return self._sd_article.data["coredata"]["dc:description"]
 
     def text(self):
         """Gets the document's text"""
-        return self.data["originalText"]
+        
+        txt=self._sd_article.data["originalText"]
+        cln_txt = remove_gif(txt)
+        return cln_txt
 
     def keywords(self):
         """Gets the document's Keywords"""
-        try:
-            kw = self.data["coredata"]["dcterms:subject"]
+        try:    
+            kw=self._sd_article.data["coredata"]["dcterms:subject"]
             KW_list = [item['$'] for item in kw]
             return KW_list
         except KeyError:

@@ -31,8 +31,8 @@ for gen in page.findAll("p", {'class': 'item'}):
     article = JasssArticle(url=url_article)
 
     if article.is_review():
-        break
-
+        pass
+    
     res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
     print(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)

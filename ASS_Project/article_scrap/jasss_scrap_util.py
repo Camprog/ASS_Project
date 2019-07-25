@@ -3,8 +3,10 @@ from urllib import request
 
 import bs4
 import re
+import os
 
 # from itertools import product
+
 
 slash_conversion = "_Alt47_"
 
@@ -39,9 +41,12 @@ meta = {"title": "DC.Title",
 #                     range(max(1, to_article[0])), to_article[1])
 
 
+
+    
+    
+    
 def get_latest_url():
     """Get the latest possible article from JASSS
-
     :return: the url reference to the page of the last to date JASSS article
     """
     req = request.urlopen(index_url).read()
@@ -51,7 +56,6 @@ def get_latest_url():
 
 def get_any_url():
     """Get a random url from first to last JASSS article
-
     :return: the url reference of any article from JASSS
     """
     req = request.urlopen(index_url).read()
@@ -76,8 +80,33 @@ def doi_converter(article_doi):
 
 def clean_text(text):
     """
-
     :return: A clean version of the content of the article
     """
     intro_split = re.split('\nintroduction\n', text, re.IGNORECASE)
     print(intro_split)
+    
+    
+def remove_gif(text):
+    """Remove GIF adresse in a texte"""        
+    
+    clean_txt = ''.join(character for character in text if ord(character) < 128)
+    clean_txt = re.sub(r'\n', '', clean_txt)
+    clean_txt = re.sub(r'https\S+','', clean_txt)
+    clean_txt = re.sub(r'http\S+','', clean_txt)
+    clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
+    clean_txt = re.sub(r'(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
+    clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)','',clean_txt)
+    print(type(clean_txt))
+    #isImgUrl= "/(https?:\/\/.*\.(?:png|jpg|gif))/i"
+    # remove new line and digits with regular expression
+#    clean_txt = re.sub('gif$','',text)    
+#    clean_txt = re.sub('^\w+\.+\/+jpg$','',text)
+        #clean_txt = re.sub()
+    return clean_txt
+
+
+#def remove_word(text):
+#    x = [r'DOWNSAMPLED',r'IMAGE-HIGH-RES']
+#    for i in x:
+#        clean_txt = re.sub(i,'',text)
+#        return clean_txt
