@@ -87,16 +87,19 @@ def clean_text(text):
     
     
 def remove_gif(text):
-    """Remove GIF adresse in a texte"""        
-    
+    """Remove GIF adresse in a texte"""  
+      
+    text= str(text)
     clean_txt = ''.join(character for character in text if ord(character) < 128)
-    clean_txt = re.sub(r'\n', '', clean_txt)
-    clean_txt = re.sub(r'https\S+','', clean_txt)
+    clean_txt = re.sub(r'\n','',clean_txt)
+    clean_txt = re.sub(r'https\S+','',clean_txt)
     clean_txt = re.sub(r'http\S+','', clean_txt)
     clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
     clean_txt = re.sub(r'(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
     clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)','',clean_txt)
-    print(type(clean_txt))
+    clean_txt = re.sub(r'[^a-zA-Z0-9_, ]','',clean_txt)
+    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| [A-Z] |  | \d )','',clean_txt)
+    #print(type(clean_txt))
     #isImgUrl= "/(https?:\/\/.*\.(?:png|jpg|gif))/i"
     # remove new line and digits with regular expression
 #    clean_txt = re.sub('gif$','',text)    
@@ -104,6 +107,29 @@ def remove_gif(text):
         #clean_txt = re.sub()
     return clean_txt
 
+def text_clean(text, firstauthor):
+    
+    txt_1 = "[\s\S]*{}".format(firstauthor)
+    
+     
+    #text_0 = re.sub(r'[^a-zA-Z0-9_ ]',"",text)
+    text_1 = re.sub(r'%s'%txt_1,"",text)
+    text_sub = re.sub(r'(1\.1|2)\W.*','',text_1)
+    print ("\n\n\n\n\n2eme étape :",text_sub)
+    
+    text_alone = re.sub(r'[\S+\s]*%s'%text_sub,"",text_1)
+    text_alone = re.sub(r'[^a-zA-Z0-9_,]',"",text_alone)
+    
+    return text_alone
+
+
+#def concat_title(title):
+#    
+#    title = str(title)
+#    title_concat = re.sub("  ","",title)
+#    
+#    return title_concat
+    
 
 #def remove_word(text):
 #    x = [r'DOWNSAMPLED',r'IMAGE-HIGH-RES']

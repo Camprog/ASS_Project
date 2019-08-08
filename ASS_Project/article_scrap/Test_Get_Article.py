@@ -7,27 +7,12 @@ Created on Thu Jul 18 10:44:26 2019
 """
 
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 10 15:59:34 2019
-
-@author: camillelamy
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul  4 09:57:57 2019
-
-@author: Cam
-"""
-
 from elsapy.elsclient import ElsClient
 #from elsapy.elsdoc import FullDoc
 import json
 import re
-from ASS_Project.article_scrap.ass_article import ScienceDirectArticle as SD_A
+from ASS_Project.article_scrap.ass_article import ScienceDirectArticle
+#from ASS_Project.article_scrap.jasss_scrap_util import concat_title
 import os
 from pathlib import Path
 import random
@@ -40,7 +25,7 @@ config = json.load(con_file)
 con_file.close()
 client = ElsClient(config['apikey'])
 
-## ScienceDirect (full-text) document example using PII
+#ScienceDirect (full-text) document example using PII
 
 with open(os.getcwd()+"/list_pii_EM.json") as json_file:  
     pii_code = json.load(json_file)
@@ -50,31 +35,49 @@ with open(os.getcwd()+"/list_pii_RTM.json") as json_file:
 
 
 List_PII_RTM = re.sub("[^\w]", " ",  pii_code_RTM).split()
+print(len(List_PII_RTM))
 List_PII = re.sub("[^\w]", " ",  pii_code).split()
+print(len(List_PII))
 
-r=2
+r=500
 list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
-print (list_rdm)
-   
-for i in list_rdm:
+#list_rdm = ["S0304380012004012"]
+print ("PII list : ",list_rdm)
+
+
+def test_get_articles(i,list):   
+    for i in list:
+        
+        print("Phase 1")
+        ass_doc = ScienceDirectArticle(i, client)
     
-    ass_doc = SD_A(i, client)
-#    print ("\n\n\n",ass_doc.keywords(),"\n\n\n")
-#    print (ass_doc.abstract(),"\n\n\n")
-#    print (ass_doc.text(),"\n\n\n")
-    print (ass_doc.doi())
-    
-    
-    doss = Path(os.getcwd()+"/data/")
-    res_file = str(doss)+"/SD_article_"+str(ass_doc.doi())+".txt"
-    ass_doc.save(res_file)
-    
-    ass_doc._sd_article.write()
-#    
-#    
+        if ass_doc.is_undesired():
+            pass
+        else:
+        #print (ass_doc.doi())
+            print("Phase 2")
+            doss = Path(os.getcwd()+"/data/")
+            print("Phase 3")
+            res_file = str(doss)+"/SD_article_"+(ass_doc.doi())+".txt"
+            print("Phase 4")
+            ass_doc.save(res_file)
+            print("Phase 5")
+            
+            ass_doc._sd_article.write()
+            print("Phase 6 \n\n\n\n\n\n\n") 
+
+x= int   
+articles = test_get_articles(x,list_rdm)  
+print (articles)
     
 
+
+#    
+#    
     
+#titre_concat = concat_title(ass_doc.title)
+#    print (titre_concat)
+#    
 
     
     #for i in pii_doc.data["coredata"]["dcterms:subject"][i]["$"]:

@@ -12,6 +12,7 @@ from ASS_Project.article_scrap import jasss_scrap_util
 from ASS_Project.article_scrap.jasss_scrap_util import doi_converter 
 from ASS_Project.article_scrap.jasss_scrap_util import remove_gif
 import re
+import unicodedata
 
 
 class ASSArticle:
@@ -22,12 +23,13 @@ class ASSArticle:
     text_tag = "CONTENT"
 
     def __init__(self, file):
+        print("init ASS")
         json_content = json.load(file)
         self._title = json_content[self.title_tag]
         self._abstract = json_content[self.abstract_tag]
         self._keywords = json_content[self.keywords_tag]
         self._content = json_content[self.text_tag]
-
+        print("init ASS end")
     @abstractmethod
     def title(self):
         return self._title
@@ -42,14 +44,16 @@ class ASSArticle:
 
     @abstractmethod
     def text(self):
+        print("text ASS")
         return self._content
     
     
     #def doi(self):
 
     def save(self, res_file):
+        print("save : 1")
         file = open(res_file, "w")
-
+        print("2")
         file.write(json.dumps(
             {
                 self.title_tag: self.title(),
@@ -58,7 +62,7 @@ class ASSArticle:
                 self.text_tag:  self.text()
             }
         ))
-
+        print("3")
         file.close()
 
 
@@ -216,21 +220,23 @@ class JasssArticle(ASSArticle):
 
 
 class ScienceDirectArticle(ASSArticle):
-    #sd_article: FullDoc
 
     def __init__(self, *args):
         """
         
         """
-        print(args[0])
+        print("PII : ",args[0])
         self._sd_article = FullDoc(sd_pii=args[0])
+        print("init SD 1")
         if not self._sd_article.read(els_client=args[1]):
+            print("raise HTTPError")
             raise HTTPError
             
     def doi(self):
         """Gets the document's DOI"""
         try:
             doi = self._sd_article.data["coredata"]["dc:identifier"]
+            print ("Check DOI")
             return doi_converter(doi)
         except KeyError:
             doi = ["No DOI"]
@@ -240,19 +246,152 @@ class ScienceDirectArticle(ASSArticle):
     def title(self):
         """Gets the document's title"""
         sd_title = re.sub("/"," ",self._sd_article.title)
+        print ("Check title")
         return sd_title
         
     def abstract(self):
         """Gets the document's abstract"""
         return self._sd_article.data["coredata"]["dc:description"]
-
+    
+    def is_undesired(self):
+        """ Tells if this article is undesired or not """
+        title_revue = self.title()
+        try:
+            if title_revue == "Editorial Board":
+                print("Editorial Board")
+                return True
+            if title_revue == "Index":
+                print("Index")
+                return True
+            if "Title Page" in title_revue:
+                print("Prelim Title Page")
+                return True
+            if "Subject Index" in title_revue:
+                print("Subject Index")
+                return True
+            if "Letter to the Editor" in self._sd_article.data["coredata"]["pubType"]:
+                print(str(self._sd_article.data["coredata"]["pubType"]))
+                return True
+            if "Book review" in self._sd_article.data["coredata"]["pubType"]:
+                print(str(self._sd_article.data["coredata"]["pubType"]))
+                return True
+        except KeyError:
+            return False
+        
+    def author_checking(self):
+        try:
+            if self._sd_article.data["coredata"]["dc:creator"][0]["$"] == str:
+                print("find Author 1")
+                return True
+            if self._sd_article.data["coredata"]["dc:creator"]["$"] == str:
+                print("find Author 2")
+                return True
+        except KeyError :
+            print("No Author")
+            return False
+        
+    def author_1(self):
+        
+        if self.author_checking:
+            try:
+                author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
+                print ("2",author_brut)
+                author = re.sub(r'(,|\.)','',author_brut)
+                print ("3",author)
+                author_sub = re.sub(r'(^\w+\b \w)',"",author)
+                
+                print ("4")
+                print (author_sub)
+                author_final = re.sub(author_sub,"",author)
+                print ("5",author_final)
+                AUTHOR = author_final.upper()
+                print ("6",AUTHOR)
+                AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
+                print ("7",AUTHOR)
+                AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
+                print ("8")
+                return AUTHOR
+                
+            except:
+                author_brut = self._sd_article.data["coredata"]["dc:creator"]["$"]
+                print("Author :",author_brut)
+                author = re.sub(r'(,|\.)','',author_brut)
+                author_sub = re.sub(r'(^\w+\b \w)',"",author)
+                author_final = re.sub(author_sub,"",author)
+                AUTHOR = author_final.upper()
+                AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
+                AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
+                return AUTHOR
+                
+           
+        else:
+            print("Author error")
+            pass
+           
+            
+    def concat_title(self):
+        
+        concat_title = self.title()
+        concat_title = re.sub(r'\W','',concat_title)
+        CONCAT_TITLE = concat_title.upper()
+        print(CONCAT_TITLE)
+        #CONCAT_TITLE = CONCAT_TITLE.encode('ASCII','ignore')
+        print(CONCAT_TITLE)
+        TITLE = re.sub(r'(AND|OF|THE|TO)',"",CONCAT_TITLE)
+        print (TITLE)
+        return TITLE
+    
     def text(self):
         """Gets the document's text"""
+        print("txt :1")
+        txt = self._sd_article.data["originalText"]
+        txt = re.sub(r' Nomenclature',"",txt)
+        print("2")
+        auteur = str(self.author_1())
         
-        txt=self._sd_article.data["originalText"]
-        cln_txt = remove_gif(txt)
-        return cln_txt
-
+        #auteur = re.sub(r'\W','',auteur)
+        print("3")
+        print(auteur)
+        txt_1 = ".*"+auteur
+        print("4")
+        print(txt_1)
+        print("5")
+        
+        
+        text_1 = re.sub(txt_1,"",txt)
+        text_sub = re.sub(r'(1\.1|2)\W.*','',text_1)
+        #print ("\n2eme étape :",text_sub)
+        
+        
+        if "serial JL" in text_sub:
+#            print ("Syntax author")
+#            title = self.concat_title()
+#            print(type(title))
+#            print(title)
+#            title_sub = ".*{}".format(title)
+#            print ("title_sub",title_sub)
+#            text_brut = re.sub(r'%s'%title_sub,'',txt)
+#            #print(text_brut)
+#            text_brut = re.sub(r'^\D+','',text_brut)
+#            print(text_brut)
+#            intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
+#            #print("\n2 :",text_brut)
+#            print("\n Intro :",intro)
+#            text_alone = re.sub(r'.*%s'%intro,"",txt)
+            print ("Syntax author")
+            return remove_gif(txt)
+        
+        else:
+            text_alone = re.sub(r'.*%s'%text_sub,"",text_1)
+            print("6")
+            text_alone = re.sub(r'[^a-zA-Z0-9_ ]',"",text_alone)
+            print("6,5")
+            text_alone = re.sub(r'( References).*',"",text_alone)
+            text_alone = re.sub(r'( Appendix A).*',"",text_alone)
+            print("7")
+            #cln_txt = remove_gif(txt)
+            return text_alone
+    
     def keywords(self):
         """Gets the document's Keywords"""
         try:    
@@ -262,3 +401,8 @@ class ScienceDirectArticle(ASSArticle):
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
+        
+    
+    
+    
+    
