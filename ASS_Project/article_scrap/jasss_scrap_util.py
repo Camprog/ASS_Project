@@ -5,7 +5,7 @@ import bs4
 import re
 import os
 
-from itertools import product
+# from itertools import product
 
 
 slash_conversion = "_Alt47_"

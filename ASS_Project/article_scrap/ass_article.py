@@ -46,9 +46,6 @@ class ASSArticle:
     def text(self):
         print("text ASS")
         return self._content
-    
-    
-    #def doi(self):
 
     def save(self, res_file):
         print("save : 1")
@@ -59,8 +56,10 @@ class ASSArticle:
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag:  self.text()
-            }
+                self.text_tag: self.text()
+            },
+            ensure_ascii=False,
+            indent=0
         ))
         print("3")
         file.close()
@@ -88,14 +87,16 @@ class JasssArticle(ASSArticle):
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(args[1]) + jasss_scrap_util.separator
+            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(
+                args[1]) + jasss_scrap_util.separator
             req = requests.get(basic_url + str(args[2]) + jasss_scrap_util.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
-                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
-                                                'html5lib')
+                self.bs_article = BeautifulSoup(
+                    requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
+                    'html5lib')
 
     def __repr__(self):
         return self.url
@@ -401,8 +402,11 @@ class ScienceDirectArticle(ASSArticle):
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
+<<<<<<< HEAD
         
     
     
     
     
+=======
+>>>>>>> 6706c5b57c5b86668ca269ba4d606d4d2562c672
