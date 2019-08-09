@@ -3,6 +3,7 @@ from urllib import request
 
 import bs4
 import re
+import logging
 import os
 
 # from itertools import product
@@ -28,23 +29,6 @@ meta = {"title": "DC.Title",
         "doi": "DC.Identifier.DOI"}
 
 
-# def visit_articles(to_volume=(1, 1), to_number=(1, 4), to_article=(1, 1)):
-#     """Retrieve a collection of articles from 1 to args volume, issue and article found in JASSS
-#
-#     :param int to_volume: the max number of volume; between 1 and ongoing number of volume
-#     :param int to_number: the max number of issue; between 1 and 4
-#     :param int to_article: the max number of article; between 1 and the number of article for current volume and issue
-#     :return: a tuple made of html pages
-#     """
-#     return product(max(1, range(to_volume[0]), to_volume[1]),
-#                     range(max(1, to_number[0]), min(4, to_number[1])),
-#                     range(max(1, to_article[0])), to_article[1])
-
-
-
-    
-    
-    
 def get_latest_url():
     """Get the latest possible article from JASSS
     :return: the url reference to the page of the last to date JASSS article
@@ -78,12 +62,14 @@ def doi_converter(article_doi):
         return article_doi.replace(slash_conversion, "/")
 
 
-def clean_text(text):
+def clean_text(text, **kwargs):
     """
     :return: A clean version of the content of the article
     """
-    intro_split = re.split('\nintroduction\n', text, re.IGNORECASE)
-    print(intro_split)
+    clean_txt = str(text)
+    for rx in kwargs.keys():
+        re.sub(rx, kwargs.get(rx), clean_txt)
+    return clean_text
     
     
 def remove_gif(text):
@@ -91,34 +77,28 @@ def remove_gif(text):
       
     text= str(text)
     clean_txt = ''.join(character for character in text if ord(character) < 128)
-    clean_txt = re.sub(r'\n','',clean_txt)
-    clean_txt = re.sub(r'https\S+','',clean_txt)
-    clean_txt = re.sub(r'http\S+','', clean_txt)
-    clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
-    clean_txt = re.sub(r'(gif|png|jpg|jpeg|sml|pdf|docx|doc)','',clean_txt)
-    clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)','',clean_txt)
+    clean_txt = re.sub(r'(\n|\t)', ' ', clean_txt)
+    clean_txt = re.sub(r'https\S+', '', clean_txt)
+    clean_txt = re.sub(r'http\S+', '', clean_txt)
+    clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)', '', clean_txt)
+    clean_txt = re.sub(r'(gif|png|jpg|jpeg|sml|pdf|docx|doc)', '', clean_txt)
+    clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)',
+                       '', clean_txt)
     clean_txt = re.sub(r'[^a-zA-Z0-9_, ]','',clean_txt)
-    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| [A-Z] |  | \d )','',clean_txt)
-    #print(type(clean_txt))
-    #isImgUrl= "/(https?:\/\/.*\.(?:png|jpg|gif))/i"
-    # remove new line and digits with regular expression
-#    clean_txt = re.sub('gif$','',text)    
-#    clean_txt = re.sub('^\w+\.+\/+jpg$','',text)
-        #clean_txt = re.sub()
+    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| [A-Z] |  | \d )',
+                       '', clean_txt)
     return clean_txt
+
 
 def text_clean(text, firstauthor):
     
     txt_1 = "[\s\S]*{}".format(firstauthor)
-    
-     
-    #text_0 = re.sub(r'[^a-zA-Z0-9_ ]',"",text)
     text_1 = re.sub(r'%s'%txt_1,"",text)
-    text_sub = re.sub(r'(1\.1|2)\W.*','',text_1)
-    print ("\n\n\n\n\n2eme étape :",text_sub)
+    text_sub = re.sub(r'(1\.1|2)\W.*', '', text_1)
+    logging.debug("\n\n\n\n\n2eme étape :", text_sub)
     
-    text_alone = re.sub(r'[\S+\s]*%s'%text_sub,"",text_1)
-    text_alone = re.sub(r'[^a-zA-Z0-9_,]',"",text_alone)
+    text_alone = re.sub(r'[\S+\s]*%s'%text_sub, "", text_1)
+    text_alone = re.sub(r'[^a-zA-Z0-9_,]', "", text_alone)
     
     return text_alone
 

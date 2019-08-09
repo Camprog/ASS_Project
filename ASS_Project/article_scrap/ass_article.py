@@ -2,6 +2,7 @@ import json
 from abc import abstractmethod
 
 import requests
+import logging
 
 from bs4 import BeautifulSoup
 from elsapy.elsdoc import FullDoc
@@ -23,13 +24,14 @@ class ASSArticle:
     text_tag = "CONTENT"
 
     def __init__(self, file):
-        print("init ASS")
+        logging.debug("init ASS")
         json_content = json.load(file)
         self._title = json_content[self.title_tag]
         self._abstract = json_content[self.abstract_tag]
         self._keywords = json_content[self.keywords_tag]
         self._content = json_content[self.text_tag]
-        print("init ASS end")
+        logging.debug("init ASS end")
+
     @abstractmethod
     def title(self):
         return self._title
@@ -44,24 +46,24 @@ class ASSArticle:
 
     @abstractmethod
     def text(self):
-        print("text ASS")
+        logging.debug("text ASS")
         return self._content
 
-    def save(self, res_file):
-        print("save : 1")
+    def save(self, res_file, clean=True):
+        logging.debug("save : 1")
         file = open(res_file, "w")
-        print("2")
+        logging.debug("2")
         file.write(json.dumps(
             {
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag: self.text()
+                self.text_tag: self.text(clean)
             },
             ensure_ascii=False,
             indent=0
         ))
-        print("3")
+        logging.debug("3")
         file.close()
 
 
@@ -146,17 +148,19 @@ class JasssArticle(ASSArticle):
             doi = self.get_art_content_with_tag("doi")
         return doi
 
-    def text(self):
+    def text(self, *args):
         """
+        Text content of the article
+        :param args: args[0] = boolean if true -> clean text else brut text
         :return: The plain text of the article
         """
         body = self.bs_article.findAll("article")
         if len(body) == 1:
-            return body[0].getText()
+            body = body[0].getText()
         else:
             art = self.bs_article.findAll("div", {'class': 'article'})
             if len(art) > 0:
-                return art[0].getText()
+                body = art[0].getText()
             else:
                 if len(art) == 0:
                     art = self.bs_article
@@ -171,7 +175,8 @@ class JasssArticle(ASSArticle):
                         dds[0].extract()
                         dds[1].extract()
 
-                return body.getText()
+                body = body.getText()
+        return jasss_scrap_util.remove_gif(body) if bool(args[0]) else body
 
     def get_meta_content_with_tag(self, tag="title"):
         """
@@ -365,20 +370,20 @@ class ScienceDirectArticle(ASSArticle):
         
         
         if "serial JL" in text_sub:
-#            print ("Syntax author")
-#            title = self.concat_title()
-#            print(type(title))
-#            print(title)
-#            title_sub = ".*{}".format(title)
-#            print ("title_sub",title_sub)
-#            text_brut = re.sub(r'%s'%title_sub,'',txt)
-#            #print(text_brut)
-#            text_brut = re.sub(r'^\D+','',text_brut)
-#            print(text_brut)
-#            intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
-#            #print("\n2 :",text_brut)
-#            print("\n Intro :",intro)
-#            text_alone = re.sub(r'.*%s'%intro,"",txt)
+           # print ("Syntax author")
+           # title = self.concat_title()
+           # print(type(title))
+           # print(title)
+           # title_sub = ".*{}".format(title)
+           # print ("title_sub",title_sub)
+           # text_brut = re.sub(r'%s'%title_sub,'',txt)
+           # #print(text_brut)
+           # text_brut = re.sub(r'^\D+','',text_brut)
+           # print(text_brut)
+           # intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
+           # #print("\n2 :",text_brut)
+           # print("\n Intro :",intro)
+           # text_alone = re.sub(r'.*%s'%intro,"",txt)
             print ("Syntax author")
             return remove_gif(txt)
         
@@ -402,11 +407,4 @@ class ScienceDirectArticle(ASSArticle):
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
-<<<<<<< HEAD
-        
-    
-    
-    
-    
-=======
->>>>>>> 6706c5b57c5b86668ca269ba4d606d4d2562c672
+
