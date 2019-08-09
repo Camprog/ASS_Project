@@ -18,6 +18,8 @@ import unicodedata
 
 class ASSArticle:
 
+    doi_tag = "DOI"
+    issn_tag = "ISSN"
     title_tag = "TITLE"
     abstract_tag = "ABSTRACT"
     keywords_tag = "KEYWORDS"
@@ -31,6 +33,14 @@ class ASSArticle:
         self._keywords = json_content[self.keywords_tag]
         self._content = json_content[self.text_tag]
         logging.debug("init ASS end")
+
+    @abstractmethod
+    def doi(self):
+        pass
+
+    @abstractmethod
+    def issn(self):
+        pass
 
     @abstractmethod
     def title(self):
@@ -55,10 +65,12 @@ class ASSArticle:
         logging.debug("2")
         file.write(json.dumps(
             {
+                self.doi_tag: self.doi(),
+                self.issn_tag: self.issn(),
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag: self.text(clean)
+                self.text_tag: self.text()
             },
             ensure_ascii=False,
             indent=0
@@ -134,6 +146,9 @@ class JasssArticle(ASSArticle):
         if len(the_abstract.split()) < 5:
             return str(self.bs_article.find(string="Abstract").findNext("dl").next.contents[0]).strip()
         return the_abstract
+
+    def issn(self):
+        return '1460-7425'
 
     def doi(self):
         """
