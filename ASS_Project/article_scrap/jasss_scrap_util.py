@@ -4,9 +4,6 @@ from urllib import request
 import bs4
 import re
 import logging
-import os
-
-# from itertools import product
 
 slash_conversion = "_Alt47_"
 

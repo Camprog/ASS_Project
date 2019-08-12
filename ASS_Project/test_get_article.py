@@ -8,11 +8,12 @@ Created on Thu Jul 18 10:44:26 2019
 
 
 from elsapy.elsclient import ElsClient
-#from elsapy.elsdoc import FullDoc
+
 import json
 import re
-from article_scrap.ass_article import science_direct_article
-#from ASS_Project.article_scrap.jasss_scrap_util import concat_title
+
+from ASS_Project.article_scrap.ass_article import science_direct_article
+
 import os
 from pathlib import Path
 import random

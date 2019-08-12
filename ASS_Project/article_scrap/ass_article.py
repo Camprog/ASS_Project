@@ -8,9 +8,8 @@ from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
 
-import article_scrap.jasss_scrap_util
-from article_scrap.jasss_scrap_util import doi_converter 
-from article_scrap.jasss_scrap_util import text_cleaner
+from ASS_Project.article_scrap import jasss_scrap_util
+
 import re
 import unicodedata
 
@@ -165,10 +164,10 @@ class JasssArticle(ASSArticle):
             doi = self.get_art_content_with_tag("doi")
         return doi
 
-    def text(self, *args):
+    def text(self, clean=False):
         """
         Text content of the article
-        :param args: args[0] = boolean if true -> clean text else brut text
+        :param clean: boolean if true -> clean text else brut text
         :return: The plain text of the article
         """
         body = self.bs_article.findAll("article")
@@ -193,7 +192,7 @@ class JasssArticle(ASSArticle):
                         dds[1].extract()
 
                 body = body.getText()
-        return jasss_scrap_util.text_cleaner(body) if bool(args[0]) else body
+        return jasss_scrap_util.text_cleaner(body) if clean else body
 
     def get_meta_content_with_tag(self, tag="title"):
         """
@@ -260,11 +259,11 @@ class science_direct_article(ASSArticle):
         try:
             doi = self._sd_article.data["coredata"]["dc:identifier"]
             #logging.info("Check DOI",doi_converter(doi))
-            return doi_converter(doi)
+            return jasss_scrap_util.doi_converter(doi)
         except KeyError:
             doi = ["No DOI"]
             logging.warning("No DOI")
-            return doi_converter(doi)
+            return jasss_scrap_util.doi_converter(doi)
         
         
     def title(self):
