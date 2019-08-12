@@ -8,7 +8,7 @@ from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
 
-from ASS_Project.article_scrap import jasss_scrap_util
+from ASS_Project.article_scrap import ass_scrap_util
 
 import re
 import unicodedata
@@ -95,22 +95,22 @@ class JasssArticle(ASSArticle):
         :param url url:
         """
         if len(args) == 0:
-            req = requests.get(kwargs.get('url', jasss_scrap_util.get_latest_url()))
+            req = requests.get(kwargs.get('url', ass_scrap_util.get_latest_url()))
             if req.status_code == requests.codes.ok:
                 self.url = req.url
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(
-                args[1]) + jasss_scrap_util.separator
-            req = requests.get(basic_url + str(args[2]) + jasss_scrap_util.html)
+            basic_url = ass_scrap_util.base_url + str(args[0]) + ass_scrap_util.separator + str(
+                args[1]) + ass_scrap_util.separator
+            req = requests.get(basic_url + str(args[2]) + ass_scrap_util.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 self.bs_article = BeautifulSoup(
-                    requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
+                    requests.get(basic_url + str("review" + args[2]) + ass_scrap_util.html),
                     'html5lib')
 
     def __repr__(self):
@@ -192,7 +192,7 @@ class JasssArticle(ASSArticle):
                         dds[1].extract()
 
                 body = body.getText()
-        return jasss_scrap_util.text_cleaner(body) if clean else body
+        return ass_scrap_util.text_cleaner(body) if clean else body
 
     def get_meta_content_with_tag(self, tag="title"):
         """
@@ -200,19 +200,19 @@ class JasssArticle(ASSArticle):
         :param string tag: the tag to find in the soup
         :return: a string representation of the content of the tag
         """
-        m_name = jasss_scrap_util.jasss_meta_name
-        m_content = jasss_scrap_util.jasss_meta_content
-        if self.bs_article.find_next(jasss_scrap_util.jasss_meta_tag,
-                                     {jasss_scrap_util.jasss_meta_name.upper(): "title"}):
-            m_name = jasss_scrap_util.jasss_meta_name.upper()
-            m_content = jasss_scrap_util.jasss_meta_content.upper()
+        m_name = ass_scrap_util.jasss_meta_name
+        m_content = ass_scrap_util.jasss_meta_content
+        if self.bs_article.find_next(ass_scrap_util.jasss_meta_tag,
+                                     {ass_scrap_util.jasss_meta_name.upper(): "title"}):
+            m_name = ass_scrap_util.jasss_meta_name.upper()
+            m_content = ass_scrap_util.jasss_meta_content.upper()
 
-        if isinstance(jasss_scrap_util.meta[tag], str):
-            meta_context = self.bs_article.find(jasss_scrap_util.jasss_meta_tag,
-                                                {m_name: jasss_scrap_util.meta[tag]})
+        if isinstance(ass_scrap_util.meta[tag], str):
+            meta_context = self.bs_article.find(ass_scrap_util.jasss_meta_tag,
+                                                {m_name: ass_scrap_util.meta[tag]})
         else:
-            for tg in jasss_scrap_util.meta[tag]:
-                meta_context = self.bs_article.find(jasss_scrap_util.jasss_meta_tag, {m_name: tg})
+            for tg in ass_scrap_util.meta[tag]:
+                meta_context = self.bs_article.find(ass_scrap_util.jasss_meta_tag, {m_name: tg})
                 if meta_context is not None:
                     break
         return meta_context[m_content]
@@ -226,7 +226,7 @@ class JasssArticle(ASSArticle):
         balise: str = "p"
         if tag == "doi":
             balise = "span"
-        result = self.bs_article.find(balise, {'class': jasss_scrap_util.art[tag]})
+        result = self.bs_article.find(balise, {'class': ass_scrap_util.art[tag]})
         if result is None:
             return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
         if tag == "doi":
@@ -259,11 +259,11 @@ class science_direct_article(ASSArticle):
         try:
             doi = self._sd_article.data["coredata"]["dc:identifier"]
             #logging.info("Check DOI",doi_converter(doi))
-            return jasss_scrap_util.doi_converter(doi)
+            return ass_scrap_util.doi_converter(doi)
         except KeyError:
             doi = ["No DOI"]
             logging.warning("No DOI")
-            return jasss_scrap_util.doi_converter(doi)
+            return ass_scrap_util.doi_converter(doi)
         
         
     def title(self):
@@ -409,14 +409,14 @@ class science_direct_article(ASSArticle):
            # print("\n Intro :",intro)
            # text_alone = re.sub(r'.*%s'%intro,"",txt)
             logging.warning("Syntax author => text_cleaner")
-            return text_cleaner(txt)
+            return ass_scrap_util.text_cleaner(txt)
         
         else:
             text_alone = re.sub(r'.*%s'%text_sub,"",text_1)
             logging.debug("text : 6")
             text_alone = re.sub(r'[^a-zA-Z0-9_ ]',"",text_alone)
             logging.debug("text : 6,5")
-            text_alone = text_cleaner(text_alone)
+            text_alone = ass_scrap_util.text_cleaner(text_alone)
             text_alone = re.sub(r'( References).*',"",text_alone)
             logging.debug("text : 7")
             #cln_txt = text_cleaner(txt)

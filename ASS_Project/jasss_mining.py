@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 
 from ASS_Project.article_scrap.ass_article import JasssArticle
-from ASS_Project.article_scrap.jasss_scrap_util import doi_converter
+from ASS_Project.article_scrap.ass_scrap_util import doi_converter
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,7 +34,7 @@ for gen in page.findAll("p", {'class': 'item'}):
     article = JasssArticle(url=url_article)
 
     if article.is_review():
-        pass
+        break
     
     res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
     logging.info(res_file)
