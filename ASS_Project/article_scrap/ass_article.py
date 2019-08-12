@@ -8,11 +8,14 @@ from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
 
-from ASS_Project.article_scrap import jasss_scrap_util
-from ASS_Project.article_scrap.jasss_scrap_util import doi_converter 
-from ASS_Project.article_scrap.jasss_scrap_util import remove_gif
+import article_scrap.jasss_scrap_util
+from article_scrap.jasss_scrap_util import doi_converter 
+from article_scrap.jasss_scrap_util import text_cleaner
 import re
 import unicodedata
+
+import logging
+
 
 
 class ASSArticle:
@@ -25,13 +28,13 @@ class ASSArticle:
     text_tag = "CONTENT"
 
     def __init__(self, file):
-        logging.debug("init ASS")
+        #logging.debug("init ASS")
         json_content = json.load(file)
         self._title = json_content[self.title_tag]
         self._abstract = json_content[self.abstract_tag]
         self._keywords = json_content[self.keywords_tag]
         self._content = json_content[self.text_tag]
-        logging.debug("init ASS end")
+        #logging.debug("init ASS end")
 
     @abstractmethod
     def doi(self):
@@ -190,7 +193,7 @@ class JasssArticle(ASSArticle):
                         dds[1].extract()
 
                 body = body.getText()
-        return jasss_scrap_util.remove_gif(body) if bool(args[0]) else body
+        return jasss_scrap_util.text_cleaner(body) if bool(args[0]) else body
 
     def get_meta_content_with_tag(self, tag="title"):
         """
@@ -239,7 +242,7 @@ class JasssArticle(ASSArticle):
         return self.bs_article
 
 
-class ScienceDirectArticle(ASSArticle):
+class science_direct_article(ASSArticle):
 
     def __init__(self, *args):
         """
@@ -256,17 +259,18 @@ class ScienceDirectArticle(ASSArticle):
         """Gets the document's DOI"""
         try:
             doi = self._sd_article.data["coredata"]["dc:identifier"]
-            print ("Check DOI")
+            #logging.info("Check DOI",doi_converter(doi))
             return doi_converter(doi)
         except KeyError:
             doi = ["No DOI"]
+            logging.warning("No DOI")
             return doi_converter(doi)
         
         
     def title(self):
         """Gets the document's title"""
         sd_title = re.sub("/"," ",self._sd_article.title)
-        print ("Check title")
+        #logging.info("Check title",sd_title)
         return sd_title
         
     def abstract(self):
@@ -278,36 +282,43 @@ class ScienceDirectArticle(ASSArticle):
         title_revue = self.title()
         try:
             if "Editorial" in title_revue :
-                print("Editorial")
+                logging.info("Editorial")
                 return True
             if title_revue == "Index":
-                print("Index")
+                logging.info("Index")
                 return True
             if "Title Page" in title_revue:
-                print("Prelim Title Page")
+                logging.info("Title page")
                 return True
             if "Subject Index" in title_revue:
-                print("Subject Index")
+                logging.info("Subject Index")
+                return True
+            if "Preface" in title_revue:
+                logging.info("Preface")
                 return True
             if "Letter to the Editor" in self._sd_article.data["coredata"]["pubType"]:
-                print(str(self._sd_article.data["coredata"]["pubType"]))
+                logging.info(str(self._sd_article.data["coredata"]["pubType"]))
                 return True
             if "Book review" in self._sd_article.data["coredata"]["pubType"]:
-                print(str(self._sd_article.data["coredata"]["pubType"]))
+                logging.info(str(self._sd_article.data["coredata"]["pubType"]))
                 return True
+            if "Author index" in title_revue:
+                logging.info("Author index")
+                return True
+            
         except KeyError:
             return False
         
     def author_checking(self):
         try:
             if self._sd_article.data["coredata"]["dc:creator"][0]["$"] == str:
-                print("find Author 1")
+                logging.debug("find Author 1")
                 return True
             if self._sd_article.data["coredata"]["dc:creator"]["$"] == str:
-                print("find Author 2")
+                logging.debug("find Author 2")
                 return True
         except KeyError :
-            print("No Author")
+            logging.warning("No Author")
             return False
         
     def author_1(self):
@@ -316,26 +327,25 @@ class ScienceDirectArticle(ASSArticle):
             try:
                 if self._sd_article.data["coredata"]["dc:creator"][0]["$"]:
                     author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
-                    print ("2",author_brut)
+                    #logging.debug("author_1: 2",author_brut)
                     author = re.sub(r'(,|\.)','',author_brut)
-                    print ("3",author)
+                    #logging.debug("author_1: 3",author)
                     author_sub = re.sub(r'(^\w+\b \w)',"",author)
                     
-                    print ("4")
-                    print (author_sub)
+                    #logging.debug("author_1: 4",author_sub)
                     author_final = re.sub(author_sub,"",author)
-                    print ("5",author_final)
+                    #logging.debug("author_1: 5",author_final)
                     AUTHOR = author_final.upper()
-                    print ("6",AUTHOR)
+                    #logging.debug("author_1: 6",AUTHOR)
                     AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                    print ("7",AUTHOR)
+                    #logging.debug("author_1: 7",AUTHOR)
                     AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
-                    print ("8")
+                    #logging.debug("author_1: 8")
                     return AUTHOR
                 
                 else:
                     author_brut = self._sd_article.data["coredata"]["dc:creator"]["$"]
-                    print("Author :",author_brut)
+                    #logging.debug("author_1: Author -",author_brut)
                     author = re.sub(r'(,|\.)','',author_brut)
                     author_sub = re.sub(r'(^\w+\b \w)',"",author)
                     author_final = re.sub(author_sub,"",author)
@@ -344,11 +354,11 @@ class ScienceDirectArticle(ASSArticle):
                     AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
                     return AUTHOR
             except KeyError :
-                print ("Author Error")
+                logging.waring("Author Error => KeyError")
                 return False
            
         else:
-            print("Author error")
+            logging.waring("Author_checking false")
             pass
            
             
@@ -357,32 +367,29 @@ class ScienceDirectArticle(ASSArticle):
         concat_title = self.title()
         concat_title = re.sub(r'\W','',concat_title)
         CONCAT_TITLE = concat_title.upper()
-        print(CONCAT_TITLE)
+        logging.debug("concat_title",CONCAT_TITLE)
         #CONCAT_TITLE = CONCAT_TITLE.encode('ASCII','ignore')
-        print(CONCAT_TITLE)
         TITLE = re.sub(r'(AND|OF|THE|TO)',"",CONCAT_TITLE)
-        print (TITLE)
+        logging.debug(TITLE)
         return TITLE
     
     def text(self):
         
         """Gets the document's text"""
-        print("txt :1")
+        logging.debug("text : 1")
         txt = self._sd_article.data["originalText"]
         txt = re.sub(r' Nomenclature',"",txt)
-        print("2")
+        logging.debug("text : 2")
         auteur = str(self.author_1())
         
         #auteur = re.sub(r'\W','',auteur)
-        print("3")
-        print(auteur)
+        logging.debug("text : 3")
         txt_1 = ".*"+auteur
-        print("4")
-        print(txt_1)
-        print("5")
-        
+        logging.debug("text : 4"+str(txt_1))
         
         text_1 = re.sub(r'%s'%txt_1,"",txt)
+        logging.debug("text : 5")
+        
         text_sub = re.sub(r'(1\.1|2)\W.*','',text_1)
         #print ("\n2eme étape :",text_sub)
         
@@ -402,18 +409,18 @@ class ScienceDirectArticle(ASSArticle):
            # #print("\n2 :",text_brut)
            # print("\n Intro :",intro)
            # text_alone = re.sub(r'.*%s'%intro,"",txt)
-            print ("Syntax author")
-            return remove_gif(txt)
+            logging.warning("Syntax author => text_cleaner")
+            return text_cleaner(txt)
         
         else:
             text_alone = re.sub(r'.*%s'%text_sub,"",text_1)
-            print("6")
+            logging.debug("text : 6")
             text_alone = re.sub(r'[^a-zA-Z0-9_ ]',"",text_alone)
-            print("6,5")
-            text_alone = remove_gif(text_alone)
+            logging.debug("text : 6,5")
+            text_alone = text_cleaner(text_alone)
             text_alone = re.sub(r'( References).*',"",text_alone)
-            print("7")
-            #cln_txt = remove_gif(txt)
+            logging.debug("text : 7")
+            #cln_txt = text_cleaner(txt)
             return text_alone
     
     def keywords(self):

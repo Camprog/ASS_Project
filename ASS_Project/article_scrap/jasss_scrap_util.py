@@ -8,7 +8,6 @@ import os
 
 # from itertools import product
 
-
 slash_conversion = "_Alt47_"
 
 base_url = "http://jasss.soc.surrey.ac.uk/"
@@ -72,8 +71,8 @@ def clean_text(text, **kwargs):
     return clean_text
     
     
-def remove_gif(text):
-    """Remove GIF adresse in a texte"""  
+def text_cleaner(text):
+    """remove undisired caracters in a texte"""  
       
     text= str(text)
     clean_txt = ''.join(character for character in text if ord(character) < 128)
@@ -85,8 +84,7 @@ def remove_gif(text):
     clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)',
                        '', clean_txt)
     clean_txt = re.sub(r'[^a-zA-Z0-9_, ]','',clean_txt)
-    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| [A-Z] |  | \d )',
-                       '', clean_txt)
+    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )','', clean_txt)
     return clean_txt
 
 
