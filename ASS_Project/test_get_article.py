@@ -39,7 +39,7 @@ print(len(List_PII_RTM))
 List_PII = re.sub("[^\w]", " ",  pii_code).split()
 print(len(List_PII))
 
-r=500
+r=50
 list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
 #list_rdm = ["S0304380012004012"]
 print ("PII list : ",list_rdm)
@@ -61,10 +61,7 @@ def test_get_articles(i,list):
             res_file = str(doss)+"/SD_article_"+(ass_doc.doi())+".txt"
             print("Phase 4")
             ass_doc.save(res_file)
-            print("Phase 5")
-            
-            ass_doc._sd_article.write()
-            print("Phase 6 \n\n\n\n\n\n\n") 
+            print("Phase 5 \n\n\n\n\n\n\n")
 
 x= int   
 articles = test_get_articles(x,list_rdm)  
