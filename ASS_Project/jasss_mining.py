@@ -9,11 +9,14 @@ from urllib import request
 
 import bs4
 import os
+import logging
 
 from pathlib import Path
 
 from ASS_Project.article_scrap.ass_article import JasssArticle
 from ASS_Project.article_scrap.jasss_scrap_util import doi_converter
+
+logging.basicConfig(level=logging.INFO)
 
 url_JASSS = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 req_text = request.urlopen(url=url_JASSS).read()
@@ -27,14 +30,15 @@ tp = Path(os.getcwd()+"/data/")
 for gen in page.findAll("p", {'class': 'item'}):
     itr += 1
     url_article = gen.find("a")['href']
-    print(str(itr)+" => "+url_article)
+    logging.info(str(itr)+" => "+url_article)
     article = JasssArticle(url=url_article)
 
     if article.is_review():
         pass
     
     res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
-    print(res_file)
+    logging.info(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
-    article.save(res_file)
+    article.save(res_file, False)
+    input("Type 'enter' button to continue")

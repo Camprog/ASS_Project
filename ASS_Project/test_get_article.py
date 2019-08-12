@@ -20,17 +20,17 @@ import random
 
     
 ## Load configuration
-con_file = open(os.getcwd()+"/ASS_Project/article_scrap/config.json")
+con_file = open(os.getcwd()+"/article_scrap/config.json")
 config = json.load(con_file)
 con_file.close()
 client = ElsClient(config['apikey'])
 
 #ScienceDirect (full-text) document example using PII
 
-with open(os.getcwd()+"/list_pii_EM.json") as json_file:  
+with open(os.getcwd()+"/../list_pii_EM.json") as json_file:
     pii_code = json.load(json_file)
  
-with open(os.getcwd()+"/list_pii_RTM.json") as json_file:  
+with open(os.getcwd()+"/../list_pii_RTM.json") as json_file:
     pii_code_RTM = json.load(json_file)
 
 
@@ -52,6 +52,10 @@ def test_get_articles(i,list):
         ass_doc = ScienceDirectArticle(i, client)
     
         if ass_doc.is_undesired():
+            print("Filtred document => meaningless")
+            pass
+        if ass_doc.author_1 is False:
+            print("Filtred document => author error")
             pass
         else:
         #print (ass_doc.doi())

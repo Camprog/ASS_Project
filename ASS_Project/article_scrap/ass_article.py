@@ -17,19 +17,30 @@ import unicodedata
 
 class ASSArticle:
 
+    doi_tag = "DOI"
+    issn_tag = "ISSN"
     title_tag = "TITLE"
     abstract_tag = "ABSTRACT"
     keywords_tag = "KEYWORDS"
     text_tag = "CONTENT"
 
     def __init__(self, file):
-        print("init ASS")
+        logging.debug("init ASS")
         json_content = json.load(file)
         self._title = json_content[self.title_tag]
         self._abstract = json_content[self.abstract_tag]
         self._keywords = json_content[self.keywords_tag]
         self._content = json_content[self.text_tag]
-        print("init ASS end")
+        logging.debug("init ASS end")
+
+    @abstractmethod
+    def doi(self):
+        pass
+
+    @abstractmethod
+    def issn(self):
+        pass
+
     @abstractmethod
     def title(self):
         return self._title
@@ -44,25 +55,26 @@ class ASSArticle:
 
     @abstractmethod
     def text(self):
-        print("text ASS")
+        logging.debug("text ASS")
         return self._content
-    
-    
-    #def doi(self):
 
-    def save(self, res_file):
-        print("save : 1")
+    def save(self, res_file, clean=True):
+        logging.debug("save : 1")
         file = open(res_file, "w")
-        print("2")
+        logging.debug("2")
         file.write(json.dumps(
             {
+                self.doi_tag: self.doi(),
+                self.issn_tag: self.issn(),
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag:  self.text()
-            }
+                self.text_tag: self.text()
+            },
+            ensure_ascii=False,
+            indent=0
         ))
-        print("3")
+        logging.debug("3")
         file.close()
 
 
@@ -88,14 +100,16 @@ class JasssArticle(ASSArticle):
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(args[1]) + jasss_scrap_util.separator
+            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(
+                args[1]) + jasss_scrap_util.separator
             req = requests.get(basic_url + str(args[2]) + jasss_scrap_util.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
-                self.bs_article = BeautifulSoup(requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
-                                                'html5lib')
+                self.bs_article = BeautifulSoup(
+                    requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
+                    'html5lib')
 
     def __repr__(self):
         return self.url
@@ -132,6 +146,9 @@ class JasssArticle(ASSArticle):
             return str(self.bs_article.find(string="Abstract").findNext("dl").next.contents[0]).strip()
         return the_abstract
 
+    def issn(self):
+        return '1460-7425'
+
     def doi(self):
         """
         Give the DOI stored in meta data
@@ -145,17 +162,19 @@ class JasssArticle(ASSArticle):
             doi = self.get_art_content_with_tag("doi")
         return doi
 
-    def text(self):
+    def text(self, *args):
         """
+        Text content of the article
+        :param args: args[0] = boolean if true -> clean text else brut text
         :return: The plain text of the article
         """
         body = self.bs_article.findAll("article")
         if len(body) == 1:
-            return body[0].getText()
+            body = body[0].getText()
         else:
             art = self.bs_article.findAll("div", {'class': 'article'})
             if len(art) > 0:
-                return art[0].getText()
+                body = art[0].getText()
             else:
                 if len(art) == 0:
                     art = self.bs_article
@@ -170,7 +189,8 @@ class JasssArticle(ASSArticle):
                         dds[0].extract()
                         dds[1].extract()
 
-                return body.getText()
+                body = body.getText()
+        return jasss_scrap_util.remove_gif(body) if bool(args[0]) else body
 
     def get_meta_content_with_tag(self, tag="title"):
         """
@@ -257,8 +277,8 @@ class ScienceDirectArticle(ASSArticle):
         """ Tells if this article is undesired or not """
         title_revue = self.title()
         try:
-            if title_revue == "Editorial Board":
-                print("Editorial Board")
+            if "Editorial" in title_revue :
+                print("Editorial")
                 return True
             if title_revue == "Index":
                 print("Index")
@@ -294,35 +314,38 @@ class ScienceDirectArticle(ASSArticle):
         
         if self.author_checking:
             try:
-                author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
-                print ("2",author_brut)
-                author = re.sub(r'(,|\.)','',author_brut)
-                print ("3",author)
-                author_sub = re.sub(r'(^\w+\b \w)',"",author)
+                if self._sd_article.data["coredata"]["dc:creator"][0]["$"]:
+                    author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
+                    print ("2",author_brut)
+                    author = re.sub(r'(,|\.)','',author_brut)
+                    print ("3",author)
+                    author_sub = re.sub(r'(^\w+\b \w)',"",author)
+                    
+                    print ("4")
+                    print (author_sub)
+                    author_final = re.sub(author_sub,"",author)
+                    print ("5",author_final)
+                    AUTHOR = author_final.upper()
+                    print ("6",AUTHOR)
+                    AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
+                    print ("7",AUTHOR)
+                    AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
+                    print ("8")
+                    return AUTHOR
                 
-                print ("4")
-                print (author_sub)
-                author_final = re.sub(author_sub,"",author)
-                print ("5",author_final)
-                AUTHOR = author_final.upper()
-                print ("6",AUTHOR)
-                AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                print ("7",AUTHOR)
-                AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
-                print ("8")
-                return AUTHOR
-                
-            except:
-                author_brut = self._sd_article.data["coredata"]["dc:creator"]["$"]
-                print("Author :",author_brut)
-                author = re.sub(r'(,|\.)','',author_brut)
-                author_sub = re.sub(r'(^\w+\b \w)',"",author)
-                author_final = re.sub(author_sub,"",author)
-                AUTHOR = author_final.upper()
-                AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
-                return AUTHOR
-                
+                else:
+                    author_brut = self._sd_article.data["coredata"]["dc:creator"]["$"]
+                    print("Author :",author_brut)
+                    author = re.sub(r'(,|\.)','',author_brut)
+                    author_sub = re.sub(r'(^\w+\b \w)',"",author)
+                    author_final = re.sub(author_sub,"",author)
+                    AUTHOR = author_final.upper()
+                    AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
+                    AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
+                    return AUTHOR
+            except KeyError :
+                print ("Author Error")
+                return False
            
         else:
             print("Author error")
@@ -342,6 +365,7 @@ class ScienceDirectArticle(ASSArticle):
         return TITLE
     
     def text(self):
+        
         """Gets the document's text"""
         print("txt :1")
         txt = self._sd_article.data["originalText"]
@@ -358,26 +382,26 @@ class ScienceDirectArticle(ASSArticle):
         print("5")
         
         
-        text_1 = re.sub(txt_1,"",txt)
+        text_1 = re.sub(r'%s'%txt_1,"",txt)
         text_sub = re.sub(r'(1\.1|2)\W.*','',text_1)
         #print ("\n2eme étape :",text_sub)
         
         
         if "serial JL" in text_sub:
-#            print ("Syntax author")
-#            title = self.concat_title()
-#            print(type(title))
-#            print(title)
-#            title_sub = ".*{}".format(title)
-#            print ("title_sub",title_sub)
-#            text_brut = re.sub(r'%s'%title_sub,'',txt)
-#            #print(text_brut)
-#            text_brut = re.sub(r'^\D+','',text_brut)
-#            print(text_brut)
-#            intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
-#            #print("\n2 :",text_brut)
-#            print("\n Intro :",intro)
-#            text_alone = re.sub(r'.*%s'%intro,"",txt)
+           # print ("Syntax author")
+           # title = self.concat_title()
+           # print(type(title))
+           # print(title)
+           # title_sub = ".*{}".format(title)
+           # print ("title_sub",title_sub)
+           # text_brut = re.sub(r'%s'%title_sub,'',txt)
+           # #print(text_brut)
+           # text_brut = re.sub(r'^\D+','',text_brut)
+           # print(text_brut)
+           # intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
+           # #print("\n2 :",text_brut)
+           # print("\n Intro :",intro)
+           # text_alone = re.sub(r'.*%s'%intro,"",txt)
             print ("Syntax author")
             return remove_gif(txt)
         
@@ -386,8 +410,8 @@ class ScienceDirectArticle(ASSArticle):
             print("6")
             text_alone = re.sub(r'[^a-zA-Z0-9_ ]',"",text_alone)
             print("6,5")
+            text_alone = remove_gif(text_alone)
             text_alone = re.sub(r'( References).*',"",text_alone)
-            text_alone = re.sub(r'( Appendix A).*',"",text_alone)
             print("7")
             #cln_txt = remove_gif(txt)
             return text_alone
@@ -401,8 +425,4 @@ class ScienceDirectArticle(ASSArticle):
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
-        
-    
-    
-    
-    
+
