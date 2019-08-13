@@ -16,7 +16,8 @@ from pathlib import Path
 from ASS_Project.article_scrap.ass_article import JasssArticle
 from ASS_Project.article_scrap.ass_scrap_util import doi_converter
 
-logging.basicConfig(level=logging.INFO)
+logging.getLogger("ass").setLevel(logging.DEBUG)
+log = logging.getLogger("ass.jasss_mining")
 
 url_JASSS = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 req_text = request.urlopen(url=url_JASSS).read()
@@ -30,15 +31,17 @@ tp = Path(os.getcwd()+"/data/")
 for gen in page.findAll("p", {'class': 'item'}):
     itr += 1
     url_article = gen.find("a")['href']
-    logging.info(str(itr)+" => "+url_article)
+    log.info(str(itr)+" => "+url_article)
     article = JasssArticle(url=url_article)
 
     if article.is_review():
-        break
+        continue
     
     res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
-    logging.info(res_file)
+    log.info(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
-    article.save(res_file, False)
-    input("Type 'enter' button to continue")
+    article.save(res_file, True)
+    if (itr % 50) == 0:
+        inp = input("Type 'c' button to continue 'e' to exit")
+        exit(0) if inp == 'e' else log.info("Carry on")
