@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from elsapy.elsdoc import FullDoc
 from requests import HTTPError
 
+from ASS_Project.article_scrap import ass_scrap_util
 
 from ASS_Project.article_scrap import jasss_scrap_util
 from ASS_Project.article_scrap.jasss_scrap_util import text_cleaner
@@ -15,10 +16,9 @@ import unicodedata
 
 import logging
 
-
+log = logging.getLogger("ass")
 
 class ASSArticle:
-
     doi_tag = "DOI"
     issn_tag = "ISSN"
     title_tag = "TITLE"
@@ -27,13 +27,13 @@ class ASSArticle:
     text_tag = "CONTENT"
 
     def __init__(self, file):
-        #logging.debug("init ASS")
+        log.debug("init ASS")
         json_content = json.load(file)
         self._title = json_content[self.title_tag]
         self._abstract = json_content[self.abstract_tag]
         self._keywords = json_content[self.keywords_tag]
         self._content = json_content[self.text_tag]
-        #logging.debug("init ASS end")
+        log.debug("init ASS end")
 
     @abstractmethod
     def doi(self):
@@ -57,13 +57,14 @@ class ASSArticle:
 
     @abstractmethod
     def text(self):
-        logging.debug("text ASS")
         return self._content
 
-    def save(self, res_file, clean=True):
-        logging.debug("save : 1")
+    @abstractmethod
+    def clean_text(self):
+        return ass_scrap_util.text_cleaner(self._content)
+
+    def save(self, res_file, clean=False):
         file = open(res_file, "w")
-        logging.debug("2")
         file.write(json.dumps(
             {
                 self.doi_tag: self.doi(),
@@ -71,12 +72,11 @@ class ASSArticle:
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag: self.text()
+                self.text_tag: self.clean_text() if clean else self.text()
             },
             ensure_ascii=False,
             indent=0
         ))
-        logging.debug("3")
         file.close()
 
 
@@ -95,22 +95,22 @@ class JasssArticle(ASSArticle):
         :param url url:
         """
         if len(args) == 0:
-            req = requests.get(kwargs.get('url', jasss_scrap_util.get_latest_url()))
+            req = requests.get(kwargs.get('url', ass_scrap_util.get_latest_url()))
             if req.status_code == requests.codes.ok:
                 self.url = req.url
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 raise HTTPError(req.reason)
         else:
-            basic_url = jasss_scrap_util.base_url + str(args[0]) + jasss_scrap_util.separator + str(
-                args[1]) + jasss_scrap_util.separator
-            req = requests.get(basic_url + str(args[2]) + jasss_scrap_util.html)
+            basic_url = ass_scrap_util.base_url + str(args[0]) + ass_scrap_util.separator + str(
+                args[1]) + ass_scrap_util.separator
+            req = requests.get(basic_url + str(args[2]) + ass_scrap_util.html)
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 self.bs_article = BeautifulSoup(
-                    requests.get(basic_url + str("review" + args[2]) + jasss_scrap_util.html),
+                    requests.get(basic_url + str("review" + args[2]) + ass_scrap_util.html),
                     'html5lib')
 
     def __repr__(self):
@@ -164,19 +164,14 @@ class JasssArticle(ASSArticle):
             doi = self.get_art_content_with_tag("doi")
         return doi
 
-    def text(self, clean=False):
-        """
-        Text content of the article
-        :param clean: boolean if true -> clean text else brut text
-        :return: The plain text of the article
-        """
+    def _text(self):
         body = self.bs_article.findAll("article")
         if len(body) == 1:
-            body = body[0].getText()
+            return body[0]
         else:
             art = self.bs_article.findAll("div", {'class': 'article'})
             if len(art) > 0:
-                body = art[0].getText()
+                return art[0]
             else:
                 if len(art) == 0:
                     art = self.bs_article
@@ -191,8 +186,31 @@ class JasssArticle(ASSArticle):
                         dds[0].extract()
                         dds[1].extract()
 
-                body = body.getText()
-        return jasss_scrap_util.text_cleaner(body) if clean else body
+                return body
+
+    def text(self):
+        """
+        Text content of the article
+        :return: The plain text of the article
+        """
+        self._text().getText()
+
+    def clean_text(self):
+        """
+        Return the text passed in a specific clean algorithm
+        :return: the clean text as a string
+        """
+        html_text = self._text()
+        bibliography: BeautifulSoup.Tag = html_text.findAll("div", {'class': 'refs'})
+        log.debug("Looking for the bibilography div: "+str(bibliography))
+        if not bibliography:
+            ref_tag = html_text.findAll("h3", text=ass_scrap_util.jasss_biblio_match)[-1]
+            log.debug("Match html tag for bibliography "+str(ref_tag))
+            for n in ref_tag.next_siblings:
+                n.decompose()
+        else:
+            bibliography.decompose()
+        return ass_scrap_util.text_cleaner(html_text.getText())
 
     def get_meta_content_with_tag(self, tag="title"):
         """
@@ -200,19 +218,19 @@ class JasssArticle(ASSArticle):
         :param string tag: the tag to find in the soup
         :return: a string representation of the content of the tag
         """
-        m_name = jasss_scrap_util.jasss_meta_name
-        m_content = jasss_scrap_util.jasss_meta_content
-        if self.bs_article.find_next(jasss_scrap_util.jasss_meta_tag,
-                                     {jasss_scrap_util.jasss_meta_name.upper(): "title"}):
-            m_name = jasss_scrap_util.jasss_meta_name.upper()
-            m_content = jasss_scrap_util.jasss_meta_content.upper()
+        m_name = ass_scrap_util.jasss_meta_name
+        m_content = ass_scrap_util.jasss_meta_content
+        if self.bs_article.find_next(ass_scrap_util.jasss_meta_tag,
+                                     {ass_scrap_util.jasss_meta_name.upper(): "title"}):
+            m_name = ass_scrap_util.jasss_meta_name.upper()
+            m_content = ass_scrap_util.jasss_meta_content.upper()
 
-        if isinstance(jasss_scrap_util.meta[tag], str):
-            meta_context = self.bs_article.find(jasss_scrap_util.jasss_meta_tag,
-                                                {m_name: jasss_scrap_util.meta[tag]})
+        if isinstance(ass_scrap_util.meta[tag], str):
+            meta_context = self.bs_article.find(ass_scrap_util.jasss_meta_tag,
+                                                {m_name: ass_scrap_util.meta[tag]})
         else:
-            for tg in jasss_scrap_util.meta[tag]:
-                meta_context = self.bs_article.find(jasss_scrap_util.jasss_meta_tag, {m_name: tg})
+            for tg in ass_scrap_util.meta[tag]:
+                meta_context = self.bs_article.find(ass_scrap_util.jasss_meta_tag, {m_name: tg})
                 if meta_context is not None:
                     break
         return meta_context[m_content]
@@ -226,7 +244,7 @@ class JasssArticle(ASSArticle):
         balise: str = "p"
         if tag == "doi":
             balise = "span"
-        result = self.bs_article.find(balise, {'class': jasss_scrap_util.art[tag]})
+        result = self.bs_article.find(balise, {'class': ass_scrap_util.art[tag]})
         if result is None:
             return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
         if tag == "doi":
@@ -241,194 +259,198 @@ class JasssArticle(ASSArticle):
         return self.bs_article
 
 
-class science_direct_article(ASSArticle):
+class ScienceDirectArticle(ASSArticle):
 
     def __init__(self, *args):
         """
         
         """
-        print("PII : ",args[0])
+        print("PII : ", args[0])
         self._sd_article = FullDoc(sd_pii=args[0])
         print("init SD 1")
         if not self._sd_article.read(els_client=args[1]):
             print("raise HTTPError")
             raise HTTPError
-            
+
     def doi(self):
         """Gets the document's DOI"""
         try:
             doi = self._sd_article.data["coredata"]["dc:identifier"]
-            #logging.info("Check DOI",doi_converter(doi))
-            return jasss_scrap_util.doi_converter(doi)
+            # log.info("Check DOI",doi_converter(doi))
+            return ass_scrap_util.doi_converter(doi)
         except KeyError:
             doi = ["No DOI"]
-            logging.warning("No DOI")
-            return jasss_scrap_util.doi_converter(doi)
-        
-        
+            log.warning("No DOI")
+            return ass_scrap_util.doi_converter(doi)
+
+    def issn(self):
+        pass
+
     def title(self):
         """Gets the document's title"""
-        sd_title = re.sub("/"," ",self._sd_article.title)
-        #logging.info("Check title",sd_title)
+        sd_title = re.sub("/", " ", self._sd_article.title)
+        # log.info("Check title",sd_title)
         return sd_title
-        
+
     def abstract(self):
         """Gets the document's abstract"""
         return self._sd_article.data["coredata"]["dc:description"]
-    
+
     def is_undesired(self):
         """ Tells if this article is undesired or not """
         title_revue = self.title()
         try:
-            if "Editorial" in title_revue :
-                logging.info("Editorial")
+            if "Editorial" in title_revue:
+                log.info("Editorial")
                 return True
             if title_revue == "Index":
-                logging.info("Index")
+                log.info("Index")
                 return True
             if "Title Page" in title_revue:
-                logging.info("Title page")
+                log.info("Title page")
                 return True
             if "Subject Index" in title_revue:
-                logging.info("Subject Index")
+                log.info("Subject Index")
                 return True
             if "Preface" in title_revue:
-                logging.info("Preface")
+                log.info("Preface")
                 return True
             if "Letter to the Editor" in self._sd_article.data["coredata"]["pubType"]:
-                logging.info(str(self._sd_article.data["coredata"]["pubType"]))
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
                 return True
             if "Book review" in self._sd_article.data["coredata"]["pubType"]:
-                logging.info(str(self._sd_article.data["coredata"]["pubType"]))
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
                 return True
             if "Author index" in title_revue:
-                logging.info("Author index")
+                log.info("Author index")
                 return True
-            
+
         except KeyError:
             return False
-        
+
     def author_checking(self):
         try:
             if self._sd_article.data["coredata"]["dc:creator"][0]["$"] == str:
-                logging.debug("find Author 1")
+                log.debug("find Author 1")
                 return True
             if self._sd_article.data["coredata"]["dc:creator"]["$"] == str:
-                logging.debug("find Author 2")
+                log.debug("find Author 2")
                 return True
-        except KeyError :
-            logging.warning("No Author")
+        except KeyError:
+            log.warning("No Author")
             return False
-        
+
     def author_1(self):
-        
+
         if self.author_checking:
             try:
-                if self._sd_article.data["coredata"]["dc:creator"][0]["$"]:
-                    author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
-                    #logging.debug("author_1: 2",author_brut)
-                    author = re.sub(r'(,|\.)','',author_brut)
-                    #logging.debug("author_1: 3",author)
-                    author_sub = re.sub(r'(^\w+\b \w)',"",author)
-                    
-                    #logging.debug("author_1: 4",author_sub)
-                    author_final = re.sub(author_sub,"",author)
-                    #logging.debug("author_1: 5",author_final)
+                author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
+                if author_brut:
+                    log.debug("author_1: 2", author_brut)
+                    author = re.sub(r'(,|\.)', '', author_brut)
+                    log.debug("author_1: 3", author)
+                    author_sub = re.sub(r'(^\w+\b \w)', "", author)
+
+                    log.debug("author_1: 4", author_sub)
+                    author_final = re.sub(author_sub, "", author)
+                    log.debug("author_1: 5", author_final)
                     AUTHOR = author_final.upper()
-                    #logging.debug("author_1: 6",AUTHOR)
+                    log.debug("author_1: 6", AUTHOR)
                     AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                    #logging.debug("author_1: 7",AUTHOR)
-                    AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
-                    #logging.debug("author_1: 8")
+                    log.debug("author_1: 7", AUTHOR)
+                    AUTHOR = re.sub(r'(b|\|\.|\')', '', str(AUTHOR))
+                    log.debug("author_1: 8")
                     return AUTHOR
-                
                 else:
-                    author_brut = self._sd_article.data["coredata"]["dc:creator"]["$"]
-                    #logging.debug("author_1: Author -",author_brut)
-                    author = re.sub(r'(,|\.)','',author_brut)
-                    author_sub = re.sub(r'(^\w+\b \w)',"",author)
-                    author_final = re.sub(author_sub,"",author)
+                    log.debug("author_1: Author -", author_brut)
+                    author = re.sub(r'(,|\.)', '', author_brut)
+                    author_sub = re.sub(r'(^\w+\b \w)', "", author)
+                    author_final = re.sub(author_sub, "", author)
                     AUTHOR = author_final.upper()
                     AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                    AUTHOR = re.sub(r'(b|\|\.|\')','',str(AUTHOR))
+                    AUTHOR = re.sub(r'(b|\|\.|\')', '', str(AUTHOR))
                     return AUTHOR
-            except KeyError :
-                logging.waring("Author Error => KeyError")
+            except KeyError:
+                log.warning("Author Error => KeyError")
                 return False
-           
+
         else:
-            logging.waring("Author_checking false")
+            log.warning("Author_checking false")
             pass
-           
-            
+
     def concat_title(self):
-        
+
         concat_title = self.title()
-        concat_title = re.sub(r'\W','',concat_title)
+        concat_title = re.sub(r'\W', '', concat_title)
         CONCAT_TITLE = concat_title.upper()
-        logging.debug("concat_title",CONCAT_TITLE)
-        #CONCAT_TITLE = CONCAT_TITLE.encode('ASCII','ignore')
-        TITLE = re.sub(r'(AND|OF|THE|TO)',"",CONCAT_TITLE)
-        logging.debug(TITLE)
+        log.debug("concat_title", CONCAT_TITLE)
+        # CONCAT_TITLE = CONCAT_TITLE.encode('ASCII','ignore')
+        TITLE = re.sub(r'(AND|OF|THE|TO)', "", CONCAT_TITLE)
+        log.debug(TITLE)
         return TITLE
-    
+
     def text(self):
-        
+
         """Gets the document's text"""
-        logging.debug("text : 1")
+        log.debug("text : 1")
         txt = self._sd_article.data["originalText"]
-        txt = re.sub(r' Nomenclature',"",txt)
-        logging.debug("text : 2")
+        txt = re.sub(r' Nomenclature', "", txt)
+        log.debug("text : 2")
         auteur = str(self.author_1())
-        
-        #auteur = re.sub(r'\W','',auteur)
-        logging.debug("text : 3")
-        txt_1 = ".*"+auteur
-        logging.debug("text : 4"+str(txt_1))
-        
-        text_1 = re.sub(r'%s'%txt_1,"",txt)
-        logging.debug("text : 5")
-        
-        text_sub = re.sub(r'(1\.1|2)\W.*','',text_1)
-        #print ("\n2eme étape :",text_sub)
-        
-        
+
+        # auteur = re.sub(r'\W','',auteur)
+        log.debug("text : 3")
+        txt_1 = ".*" + auteur
+        log.debug("text : 4" + str(txt_1))
+
+        text_1 = re.sub(r'%s' % txt_1, "", txt)
+        log.debug("text : 5")
+
+        text_sub = re.sub(r'(1\.1|2)\W.*', '', text_1)
+        # print ("\n2eme étape :",text_sub)
+
         if "serial JL" in text_sub:
-           # print ("Syntax author")
-           # title = self.concat_title()
-           # print(type(title))
-           # print(title)
-           # title_sub = ".*{}".format(title)
-           # print ("title_sub",title_sub)
-           # text_brut = re.sub(r'%s'%title_sub,'',txt)
-           # #print(text_brut)
-           # text_brut = re.sub(r'^\D+','',text_brut)
-           # print(text_brut)
-           # intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
-           # #print("\n2 :",text_brut)
-           # print("\n Intro :",intro)
-           # text_alone = re.sub(r'.*%s'%intro,"",txt)
-            logging.warning("Syntax author => text_cleaner")
-            return text_cleaner(txt)
-        
+            # print ("Syntax author")
+            # title = self.concat_title()
+            # print(type(title))
+            # print(title)
+            # title_sub = ".*{}".format(title)
+            # print ("title_sub",title_sub)
+            # text_brut = re.sub(r'%s'%title_sub,'',txt)
+            # #print(text_brut)
+            # text_brut = re.sub(r'^\D+','',text_brut)
+            # print(text_brut)
+            # intro = re.sub(r'(1\.1|2)(.|\n)*','',text_brut)
+            # #print("\n2 :",text_brut)
+            # print("\n Intro :",intro)
+            # text_alone = re.sub(r'.*%s'%intro,"",txt)
+            log.warning("Syntax author => text_cleaner")
+            return ass_scrap_util.text_cleaner(txt)
+
         else:
-            text_alone = re.sub(r'.*%s'%text_sub,"",text_1)
-            logging.debug("text : 6")
-            text_alone = re.sub(r'[^a-zA-Z0-9_ ]',"",text_alone)
-            logging.debug("text : 6,5")
-            text_alone = text_cleaner(text_alone)
-            text_alone = re.sub(r'( References).*',"",text_alone)
-            logging.debug("text : 7")
-            #cln_txt = text_cleaner(txt)
+            text_alone = re.sub(r'.*%s' % text_sub, "", text_1)
+            log.debug("text : 6")
+            text_alone = re.sub(r'[^a-zA-Z0-9_ ]', "", text_alone)
+            log.debug("text : 6,5")
+            text_alone = ass_scrap_util.text_cleaner(text_alone)
+            text_alone = re.sub(r'( References).*', "", text_alone)
+            log.debug("text : 7")
+            # cln_txt = text_cleaner(txt)
             return text_alone
-    
+
+    def clean_text(self):
+        """
+        TODO : separate method that gives the raw and cleaned text
+        :return: the text passed by several cleaner algo
+        """
+        return self.text()
+
     def keywords(self):
         """Gets the document's Keywords"""
-        try:    
-            kw=self._sd_article.data["coredata"]["dcterms:subject"]
+        try:
+            kw = self._sd_article.data["coredata"]["dcterms:subject"]
             KW_list = [item['$'] for item in kw]
             return KW_list
         except KeyError:
             KW_list = ["No Keyword"]
             return KW_list
-

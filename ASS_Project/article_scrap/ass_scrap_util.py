@@ -11,6 +11,8 @@ base_url = "http://jasss.soc.surrey.ac.uk/"
 index_url = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 separator = '/'
 
+jasss_biblio_match = "References"
+
 jasss_meta_tag = "meta"
 jasss_meta_name = "name"
 jasss_meta_content = "content"
@@ -23,6 +25,8 @@ meta = {"title": "DC.Title",
         "date": "DC.Date",
         "tags": "DC.Subject",
         "doi": "DC.Identifier.DOI"}
+
+log = logging.getLogger("ass.util")
 
 
 def get_latest_url():
@@ -90,7 +94,7 @@ def text_clean(text, firstauthor):
     txt_1 = "[\s\S]*{}".format(firstauthor)
     text_1 = re.sub(r'%s'%txt_1,"",text)
     text_sub = re.sub(r'(1\.1|2)\W.*', '', text_1)
-    logging.debug("\n\n\n\n\n2eme étape :", text_sub)
+    log.debug("\n\n\n\n\n2eme étape :", text_sub)
     
     text_alone = re.sub(r'[\S+\s]*%s'%text_sub, "", text_1)
     text_alone = re.sub(r'[^a-zA-Z0-9_,]', "", text_alone)

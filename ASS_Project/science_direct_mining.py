@@ -12,7 +12,7 @@ from elsapy.elsclient import ElsClient
 import json
 import re
 
-from ASS_Project.article_scrap.ass_article import science_direct_article
+from ASS_Project.article_scrap.ass_article import ScienceDirectArticle
 
 import os
 from pathlib import Path
@@ -53,7 +53,7 @@ def test_get_articles(i,list):
     for i in list:
         
         logging.debug("Phase 1")
-        ass_doc = science_direct_article(i, client)
+        ass_doc = ScienceDirectArticle(i, client)
     
         if ass_doc.is_undesired():
             logging.warning("Filtred document => meaningless")
