@@ -15,6 +15,7 @@ import unicodedata
 import logging
 
 log = logging.getLogger("ass")
+log.setLevel(logging.DEBUG)
 
 
 class ASSArticle:
@@ -58,11 +59,7 @@ class ASSArticle:
     def text(self):
         return self._content
 
-    @abstractmethod
-    def clean_text(self):
-        return self.text()
-
-    def save(self, res_file, clean=False):
+    def save(self, res_file):
         file = open(res_file, "w")
         file.write(json.dumps(
             {
@@ -71,7 +68,7 @@ class ASSArticle:
                 self.title_tag: self.title(),
                 self.abstract_tag: self.abstract(),
                 self.keywords_tag: self.keywords(),
-                self.text_tag: self.clean_text() if clean else self.text()
+                self.text_tag: self.text()
             },
             ensure_ascii=False,
             indent=0
@@ -192,13 +189,6 @@ class JasssArticle(ASSArticle):
         Text content of the article
         :return: The plain text of the article
         """
-        self._text().getText()
-
-    def clean_text(self):
-        """
-        Return the text passed in a specific clean algorithm
-        :return: the clean text as a string
-        """
         html_text = self._text()
         bibliography: BeautifulSoup.Tag = html_text.findAll("div", {'class': 'refs'})
         log.debug("Looking for the bibilography div: "+str(bibliography))
@@ -206,9 +196,10 @@ class JasssArticle(ASSArticle):
             ref_tag = html_text.findAll("h3", text=ass_scrap_util.jasss_biblio_match)[-1]
             log.debug("Match html tag for bibliography "+str(ref_tag))
             for n in ref_tag.next_siblings:
-                n.decompose()
+                log.debug("Extract "+str(n)+" from the text")
+                n.extract()
         else:
-            bibliography.decompose()
+            bibliography.extract()
         return ass_scrap_util.text_cleaner(html_text.getText())
 
     def get_meta_content_with_tag(self, tag="title"):
@@ -436,13 +427,6 @@ class ScienceDirectArticle(ASSArticle):
             log.debug("text : 7")
             # cln_txt = text_cleaner(txt)
             return text_alone
-
-    def clean_text(self):
-        """
-        TODO : separate method that gives the raw and cleaned text
-        :return: the text passed by several cleaner algo
-        """
-        return self.text()
 
     def keywords(self):
         """Gets the document's Keywords"""

@@ -13,11 +13,14 @@ import logging
 
 from pathlib import Path
 
+from ASS_Project.article_scrap.ass_article import log as ass_log
 from ASS_Project.article_scrap.ass_article import JasssArticle
 from ASS_Project.article_scrap.ass_scrap_util import doi_converter
 
-logging.getLogger("ass").setLevel(logging.DEBUG)
+logging.basicConfig()
 log = logging.getLogger("ass.jasss_mining")
+log.setLevel(logging.WARNING)
+ass_log.setLevel(logging.DEBUG)
 
 url_JASSS = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 req_text = request.urlopen(url=url_JASSS).read()
@@ -41,7 +44,7 @@ for gen in page.findAll("p", {'class': 'item'}):
     log.info(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
-    article.save(res_file, True)
-    if (itr % 50) == 0:
+    article.save(res_file)
+    if (itr % 1) == 0:
         inp = input("Type 'c' button to continue 'e' to exit")
         exit(0) if inp == 'e' else log.info("Carry on")
