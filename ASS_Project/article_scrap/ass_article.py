@@ -9,7 +9,7 @@ from requests import HTTPError
 
 
 from ASS_Project.article_scrap import jasss_scrap_util
-
+from ASS_Project.article_scrap.jasss_scrap_util import text_cleaner
 import re
 import unicodedata
 
