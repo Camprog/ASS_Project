@@ -16,6 +16,7 @@ import logging
 
 log = logging.getLogger("ass")
 
+
 class ASSArticle:
     doi_tag = "DOI"
     issn_tag = "ISSN"
@@ -59,7 +60,7 @@ class ASSArticle:
 
     @abstractmethod
     def clean_text(self):
-        return ass_scrap_util.text_cleaner(self._content)
+        return self.text()
 
     def save(self, res_file, clean=False):
         file = open(res_file, "w")
