@@ -12,7 +12,7 @@ from elsapy.elsclient import ElsClient
 import json
 import re
 
-from ASS_Project.article_scrap.ass_article import ScienceDirectArticle
+from article_scrap.ass_article import ScienceDirectArticle
 
 import os
 from pathlib import Path
