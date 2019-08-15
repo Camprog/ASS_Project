@@ -62,30 +62,57 @@ def doi_converter(article_doi):
         return article_doi.replace(slash_conversion, "/")
 
 
-def clean_text(text, **kwargs):
+def clean_text(text, regex_replace_dict: dict):
     """
+    Clean the text using a dictionary of key=Regex value=Replacement
+    :param text: the text to be clean
+    :param regex_replace_dict: a dictionary of Regex: replacement
     :return: A clean version of the content of the article
     """
-    clean_txt = str(text)
-    for rx in kwargs.keys():
-        re.sub(rx, kwargs.get(rx), clean_txt)
+    #clean_txt = str(text)
+    for rx, rp in regex_replace_dict.items():
+        print("Look up to match "+str(rx))
+        print("ASS") if rx.match(text) else print("LA BITE")
+        text = rx.sub(rp if rp else '', text)
     return clean_text
     
     
 def text_cleaner(text):
-    """remove undisired caracters in a texte"""  
+    """remove undesired characters in a text"""
       
-    text= str(text)
+    text = str(text)
     clean_txt = ''.join(character for character in text if ord(character) < 128)
-    clean_txt = re.sub(r'(\n|\t)', ' ', clean_txt)
-    clean_txt = re.sub(r'https\S+', '', clean_txt)
-    clean_txt = re.sub(r'http\S+', '', clean_txt)
-    clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)', '', clean_txt)
-    clean_txt = re.sub(r'(gif|png|jpg|jpeg|sml|pdf|docx|doc)', '', clean_txt)
-    clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)',
-                       '', clean_txt)
-    clean_txt = re.sub(r'[^a-zA-Z0-9_, ]','',clean_txt)
-    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )','', clean_txt)
+
+    # clean_text(clean_txt, {
+    #     re.compile(r'(\n|\t)'): ' ',
+    #     re.compile(r'https\S+'): '',
+    #     re.compile(r'http\S+'): '',
+    #     re.compile(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)'): '',
+    #     re.compile(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)'): '',
+    #     re.compile(r'[^a-zA-Z0-9_, ]'): '',
+    #     re.compile(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )'): ''
+    # })
+
+    # clean_txt = re.sub(r'(\n|\t)', '', clean_txt)
+    # clean_txt = re.sub(r'https\S+', '', clean_txt)
+    # clean_txt = re.sub(r'http\S+', '', clean_txt)
+    # clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)', '', clean_txt)
+    # clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)', '',
+    #                    clean_txt)
+    # clean_txt = re.sub(r'[^a-zA-Z0-9_, ]', '', clean_txt)
+    # clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )', '',
+    #                    clean_txt)
+
+    clean_txt = re.compile(r'(\n|\t)').sub('', clean_txt)
+    clean_txt = re.compile(r'https\S+').sub('', clean_txt)
+    clean_txt = re.compile(r'http\S+').sub('', clean_txt)
+    clean_txt = re.compile(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)').sub('', clean_txt)
+    clean_txt = re.compile(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)')\
+        .sub('', clean_txt)
+    clean_txt = re.compile(r'[^a-zA-Z0-9_, ]').sub('', clean_txt)
+    clean_txt = re.compile(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )')\
+        .sub('', clean_txt)
+
     return clean_txt
 
 
