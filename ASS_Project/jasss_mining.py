@@ -13,9 +13,9 @@ import logging
 
 from pathlib import Path
 
-from ASS_Project.article_scrap.ass_article import log as ass_log
-from ASS_Project.article_scrap.ass_article import JasssArticle
-from ASS_Project.article_scrap.ass_scrap_util import doi_converter
+from article_scrap.ass_article import log as ass_log
+from article_scrap.ass_article import JasssArticle
+from article_scrap.ass_scrap_util import doi_converter
 
 logging.basicConfig()
 log = logging.getLogger("ass.jasss_mining")
