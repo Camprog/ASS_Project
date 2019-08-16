@@ -10,6 +10,7 @@ from urllib import request
 import bs4
 import os
 import logging
+from re import findall as fall
 
 from pathlib import Path
 
@@ -28,19 +29,27 @@ req_text = request.urlopen(url=url_JASSS).read()
 page = bs4.BeautifulSoup(req_text, "lxml")
 
 itr = 0
+condition = False
 
-tp = Path(os.getcwd()+"/data/")
+tp = Path(os.getcwd() + "/data/")
 
 for gen in page.findAll("p", {'class': 'item'}):
     itr += 1
     url_article = gen.find("a")['href']
-    log.info(str(itr)+" => "+url_article)
+
+    url_issue = [e for e in fall(r"[\w']+", url_article) if e.isdigit()]
+    log.info(url_article + " => " + str(url_issue))
+    condition = condition or url_issue == ['13', '1', '14']
+    if condition:
+        continue
+
+    log.info(str(itr) + " => " + url_article)
     article = JasssArticle(url=url_article)
 
     if article.is_review():
         continue
-    
-    res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
+
+    res_file = str(tp) + "/JASSS_" + doi_converter(article.doi()) + ".txt"
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
     article.save(res_file)

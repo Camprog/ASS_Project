@@ -26,6 +26,8 @@ class ASSArticle:
     keywords_tag = "KEYWORDS"
     text_tag = "CONTENT"
 
+    NA = "NA"
+
     def __init__(self, file):
         log.debug("init ASS")
         json_content = json.load(file)
@@ -141,7 +143,11 @@ class JasssArticle(ASSArticle):
         the_abstract = self.get_meta_content_with_tag("abstract")
 
         if len(the_abstract.split()) < 5:
-            return str(self.bs_article.find(string="Abstract").findNext("dl").next.contents[0]).strip()
+            sub_abs = self.bs_article.find(string="Abstract")
+            if sub_abs:
+                return str(sub_abs.findNext("dl").next.contents[0]).strip()
+            else:
+                return super().NA
         return the_abstract
 
     def issn(self):
