@@ -69,10 +69,7 @@ def clean_text(text, regex_replace_dict: dict):
     :param regex_replace_dict: a dictionary of Regex: replacement
     :return: A clean version of the content of the article
     """
-    #clean_txt = str(text)
     for rx, rp in regex_replace_dict.items():
-        print("Look up to match "+str(rx))
-        print("ASS") if rx.match(text) else print("LA BITE")
         text = rx.sub(rp if rp else '', text)
     return clean_text
     

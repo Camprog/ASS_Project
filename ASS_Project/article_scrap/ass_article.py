@@ -9,15 +9,13 @@ from requests import HTTPError
 
 from article_scrap import ass_scrap_util
 
-from article_scrap import ass_scrap_util
-from article_scrap.ass_scrap_util import text_cleaner
 import re
 import unicodedata
 
 import logging
 
 log = logging.getLogger("ass")
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.WARNING)
 
 
 class ASSArticle:
@@ -192,16 +190,22 @@ class JasssArticle(ASSArticle):
         :return: The plain text of the article
         """
         html_text = self._text()
-        bibliography: BeautifulSoup.Tag = html_text.findAll("div", {'class': 'refs'})
+        bibliography: BeautifulSoup.Tag = html_text.findAll("div", {'id': 'refs'})
         log.debug("Looking for the bibilography div: "+str(bibliography))
         if not bibliography:
-            ref_tag = html_text.findAll("h3", text=ass_scrap_util.jasss_biblio_match)[-1]
-            log.debug("Match html tag for bibliography "+str(ref_tag))
-            for n in ref_tag.next_siblings:
-                log.debug("Extract "+str(n)+" from the text")
-                n.extract()
+            pass
+            # Seems that previous html scralling get ride off bibliography
+
+            # all_h3 = html_text.findAll("h3")
+            # log.debug(str(all_h3))
+            # ref_tag = html_text.findAll("h3", text=ass_scrap_util.jasss_biblio_match)
+            # log.debug("Match html tag for bibliography "+str(ref_tag))
+            # for n in ref_tag.final_next_siblings():
+            #     log.debug("Extract "+str(n)+" from the text")
+            #     n.extract()
         else:
-            bibliography.extract()
+            for bib in bibliography:
+                bib.extract()
         return ass_scrap_util.text_cleaner(html_text.getText())
 
     def get_meta_content_with_tag(self, tag="title"):

@@ -19,15 +19,15 @@ from article_scrap.ass_scrap_util import doi_converter
 
 logging.basicConfig()
 log = logging.getLogger("ass.jasss_mining")
-log.setLevel(logging.WARNING)
-ass_log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
+ass_log.setLevel(logging.WARNING)
 
 url_JASSS = "http://jasss.soc.surrey.ac.uk/index_by_issue.html"
 req_text = request.urlopen(url=url_JASSS).read()
 
 page = bs4.BeautifulSoup(req_text, "lxml")
 
-itr: int = 0
+itr = 0
 
 tp = Path(os.getcwd()+"/data/")
 
@@ -41,10 +41,9 @@ for gen in page.findAll("p", {'class': 'item'}):
         continue
     
     res_file = str(tp)+"/JASSS_" + doi_converter(article.doi()) + ".txt"
-    log.info(res_file)
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
 
     article.save(res_file)
-    if (itr % 1) == 0:
+    if (itr % 10000000) == 0:
         inp = input("Type 'c' button to continue 'e' to exit")
         exit(0) if inp == 'e' else log.info("Carry on")
