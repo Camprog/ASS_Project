@@ -18,7 +18,7 @@ import logging
 
 
 log = logging.getLogger("ass")
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 
 class ASSArticle:
@@ -342,6 +342,9 @@ class ScienceDirectArticle(ASSArticle):
                 return True
             if "Author index" in title_revue:
                 log.info("Author index")
+                return True
+            if "Editorial" in self._sd_article.data["coredata"]["pubType"]:
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
                 return True
             if "Short communication" in self._sd_article.data["coredata"]["pubType"]:
                 log.info(str(self._sd_article.data["coredata"]["pubType"]))

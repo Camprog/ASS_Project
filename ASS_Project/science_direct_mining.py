@@ -20,7 +20,7 @@ import random
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.INFO)
 
     
 ## Load configuration
@@ -29,7 +29,7 @@ config = json.load(con_file)
 con_file.close()
 client = ElsClient(config['apikey'])
 
-#ScienceDirect (full-text) document example using PII
+##ScienceDirect (full-text) document example using PII
 
 with open(os.getcwd()+"/../list_pii_EM.json") as json_file:
     pii_code = json.load(json_file)
@@ -42,25 +42,37 @@ List_PII_RTM = re.sub( "[^\w]", " ",  pii_code_RTM).split()
 print(len(List_PII_RTM))
 List_PII = re.sub("[^\w]", " ",  pii_code).split()
 print(len(List_PII))
+#
+#r=50
+#list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
+#list_rdm = ["S0304380002001795"]
+list_rdm = List_PII + List_PII_RTM
 
-r=50
-list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
-#list_rdm = ["S0304380000002891"]
-print ("PII list : ",list_rdm)
+#print ("PII list : ",list_rdm)
 
+
+def JsonList(y) :
+    
+    liste = json.dumps(y)
+    with open('list_achievment.json','w') as outfile:  
+        json.dump(liste,outfile)
 
 def test_get_articles(i,list):   
     
     for i in list:
-        
+        print (len(list_rdm))
         logging.debug("Phase 1")
         ass_doc = ScienceDirectArticle(i, client)
-    
+        
         if ass_doc.is_undesired():
             logging.warning("Filtred document => meaningless")
+            list_rdm.remove(i)
+            JsonList(list_rdm)
             continue
         if ass_doc.author_1() is False:
             logging.warning("Filtred document => author error")
+            list_rdm.remove(i)
+            JsonList(list_rdm)
             continue
         else:
         #print (ass_doc.doi())
@@ -71,6 +83,8 @@ def test_get_articles(i,list):
             logging.debug("Phase  4")
             ass_doc.save(res_file)
             print("Phase 5 \n\n\n\n\n\n\n")
+            list_rdm.remove(i)
+            JsonList(list_rdm)
 
 x= int   
 articles = test_get_articles(x,list_rdm)  
