@@ -31,21 +31,21 @@ client = ElsClient(config['apikey'])
 
 #ScienceDirect (full-text) document example using PII
 
-#with open(os.getcwd()+"/../list_pii_EM.json") as json_file:
-#    pii_code = json.load(json_file)
-# 
-#with open(os.getcwd()+"/../list_pii_RTM.json") as json_file:
-#    pii_code_RTM = json.load(json_file)
-#
-#
-#List_PII_RTM = re.sub( "[^\w]", " ",  pii_code_RTM).split()
-#print(len(List_PII_RTM))
-#List_PII = re.sub("[^\w]", " ",  pii_code).split()
-#print(len(List_PII))
-#
-#r=50
-#list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
-list_rdm = ["S0304380000002891"]
+with open(os.getcwd()+"/../list_pii_EM.json") as json_file:
+    pii_code = json.load(json_file)
+ 
+with open(os.getcwd()+"/../list_pii_RTM.json") as json_file:
+    pii_code_RTM = json.load(json_file)
+
+
+List_PII_RTM = re.sub( "[^\w]", " ",  pii_code_RTM).split()
+print(len(List_PII_RTM))
+List_PII = re.sub("[^\w]", " ",  pii_code).split()
+print(len(List_PII))
+
+r=50
+list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
+#list_rdm = ["S0304380000002891"]
 print ("PII list : ",list_rdm)
 
 

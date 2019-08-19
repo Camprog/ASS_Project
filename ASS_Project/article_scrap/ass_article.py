@@ -9,8 +9,8 @@ from requests import HTTPError
 
 from article_scrap import ass_scrap_util
 
-from ASS_Project.article_scrap import ass_scrap_util
-from ASS_Project.article_scrap.ass_scrap_util import text_cleaner
+from article_scrap import ass_scrap_util
+from article_scrap.ass_scrap_util import text_cleaner
 import re
 import unicodedata
 
