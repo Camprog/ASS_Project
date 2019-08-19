@@ -289,13 +289,21 @@ class ScienceDirectArticle(ASSArticle):
             return ass_scrap_util.doi_converter(doi)
 
     def issn(self):
-        return self._sd_article.data["coredata"]["prism:issn"]
+        try:
+            issn = self._sd_article.data["coredata"]["prism:issn"]
+            return issn
+        except KeyError:
+            return "No ISSN"
             
     def title(self):
         """Gets the document's title"""
-        sd_title = re.sub("/", " ", self._sd_article.title)
+        try:
+            sd_title = re.sub("/", " ", self._sd_article.title)
         # log.info("Check title",sd_title)
-        return sd_title
+            return sd_title
+        except KeyError:
+            return "No Title"
+        
 
     def abstract(self):
         """Gets the document's abstract"""
@@ -336,6 +344,9 @@ class ScienceDirectArticle(ASSArticle):
                 log.info("Author index")
                 return True
             if "Short communication" in self._sd_article.data["coredata"]["pubType"]:
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
+                return True
+            if "Preface" in self._sd_article.data["coredata"]["pubType"]:
                 log.info(str(self._sd_article.data["coredata"]["pubType"]))
                 return True
             if "Announcement" in title_revue:
