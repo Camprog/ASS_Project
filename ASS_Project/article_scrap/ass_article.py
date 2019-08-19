@@ -9,6 +9,8 @@ from requests import HTTPError
 
 from article_scrap import ass_scrap_util
 
+from ASS_Project.article_scrap import ass_scrap_util
+from ASS_Project.article_scrap.ass_scrap_util import text_cleaner
 import re
 import unicodedata
 
@@ -313,6 +315,9 @@ class ScienceDirectArticle(ASSArticle):
                 return True
             if "Subject Index" in title_revue:
                 log.info("Subject Index")
+                return True
+            if "Author Index" in title_revue:
+                log.info("Author Index")
                 return True
             if "Preface" in title_revue:
                 log.info("Preface")
