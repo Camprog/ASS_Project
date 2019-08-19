@@ -69,6 +69,7 @@ def clean_text(text, regex_replace_dict: dict):
     :param regex_replace_dict: a dictionary of Regex: replacement
     :return: A clean version of the content of the article
     """
+    
     for rx, rp in regex_replace_dict.items():
         text = rx.sub(rp if rp else '', text)
     return clean_text
@@ -76,7 +77,7 @@ def clean_text(text, regex_replace_dict: dict):
     
 def text_cleaner(text):
     """remove undesired characters in a text"""
-      
+    print("REGEX \n\n\n\n\n\n\n ")
     text = str(text)
     clean_txt = ''.join(character for character in text if ord(character) < 128)
 
@@ -89,26 +90,34 @@ def text_cleaner(text):
     #     re.compile(r'[^a-zA-Z0-9_, ]'): '',
     #     re.compile(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )'): ''
     # })
-
-    # clean_txt = re.sub(r'(\n|\t)', '', clean_txt)
-    # clean_txt = re.sub(r'https\S+', '', clean_txt)
-    # clean_txt = re.sub(r'http\S+', '', clean_txt)
-    # clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)', '', clean_txt)
-    # clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)', '',
-    #                    clean_txt)
-    # clean_txt = re.sub(r'[^a-zA-Z0-9_, ]', '', clean_txt)
-    # clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )', '',
-    #                    clean_txt)
-
-    clean_txt = re.compile(r'(\n|\t)').sub('', clean_txt)
-    clean_txt = re.compile(r'https\S+').sub('', clean_txt)
-    clean_txt = re.compile(r'http\S+').sub('', clean_txt)
-    clean_txt = re.compile(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)').sub('', clean_txt)
-    clean_txt = re.compile(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)')\
-        .sub('', clean_txt)
-    clean_txt = re.compile(r'[^a-zA-Z0-9_, ]').sub('', clean_txt)
-    clean_txt = re.compile(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )')\
-        .sub('', clean_txt)
+    clean_txt = re.sub(r'(\n|\t)',' ', clean_txt)
+    clean_txt = re.sub(r'https\S+',' ', clean_txt)
+    clean_txt = re.sub(r'http\S+',' ', clean_txt)
+    clean_txt = re.sub(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)',' ', clean_txt)
+    clean_txt = re.sub(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)',' ',clean_txt)
+    clean_txt = re.sub(r'[^a-zA-Z0-9_, ]',' ', clean_txt)
+    clean_txt = re.sub(r'.*(Introduction(?!.*Introduction))',' ', clean_txt)
+    clean_txt = re.sub(r'(References(?!.*References)).*',' ', clean_txt)
+    clean_txt = re.sub(r'(Appendix(?!.*Appendix)).*',' ', clean_txt)
+    
+    clean_txt = re.sub(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d | [A-Z] )',' ',
+                        clean_txt)
+    clean_txt = re.sub(r'  ',' ', clean_txt)
+    clean_txt = re.sub(r'  ',' ', clean_txt)
+    clean_txt = re.sub(r'  ',' ', clean_txt)
+    clean_txt = re.sub(r'  ',' ', clean_txt)
+     
+    print ("REGEX REGEX")
+    
+#    clean_txt = re.compile(r'(\n|\t)').sub('', clean_txt)
+#    clean_txt = re.compile(r'https\S+').sub('', clean_txt)
+#    clean_txt = re.compile(r'http\S+').sub('', clean_txt)
+#    clean_txt = re.compile(r'\S+\.(gif|png|jpg|jpeg|sml|pdf|docx|doc)').sub('', clean_txt)
+#    clean_txt = re.compile(r'(APPLICATION|IMAGE-DOWNSAMPLED|IMAGE-HIGH-RES|ALTIMG|IMAGE-THUMBNAIL|PDF|IMAGE-WEB-)')\
+#        .sub('', clean_txt)
+#    clean_txt = re.compile(r'[^a-zA-Z0-9_, ]').sub('', clean_txt)
+#    clean_txt = re.compile(r'((gr+\d+\W+\d+)|(Fig+\W+\d)|\d+ Elsevier |\d*jecolmodel|\w\d+|[A-Z]+[A-Z]| \d )')\
+#        .sub('', clean_txt)
 
     return clean_txt
 

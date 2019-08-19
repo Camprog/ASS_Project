@@ -16,8 +16,9 @@ import unicodedata
 
 import logging
 
+
 log = logging.getLogger("ass")
-log.setLevel(logging.WARNING)
+log.setLevel(logging.DEBUG)
 
 
 class ASSArticle:
@@ -288,8 +289,8 @@ class ScienceDirectArticle(ASSArticle):
             return ass_scrap_util.doi_converter(doi)
 
     def issn(self):
-        pass
-
+        return self._sd_article.data["coredata"]["prism:issn"]
+            
     def title(self):
         """Gets the document's title"""
         sd_title = re.sub("/", " ", self._sd_article.title)
@@ -303,7 +304,10 @@ class ScienceDirectArticle(ASSArticle):
     def is_undesired(self):
         """ Tells if this article is undesired or not """
         title_revue = self.title()
-        try:
+        try:   
+            if "Erratum to" in title_revue:
+                log.info("Erratum")
+                return True
             if "Editorial" in title_revue:
                 log.info("Editorial")
                 return True
@@ -331,6 +335,12 @@ class ScienceDirectArticle(ASSArticle):
             if "Author index" in title_revue:
                 log.info("Author index")
                 return True
+            if "Short communication" in self._sd_article.data["coredata"]["pubType"]:
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
+                return True
+            if "Announcement" in title_revue:
+                log.info("Annoucement")
+                return True
 
         except KeyError:
             return False
@@ -353,20 +363,20 @@ class ScienceDirectArticle(ASSArticle):
             try:
                 author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
                 if author_brut:
-                    log.debug("author_1: 2", author_brut)
+                    log.debug("author_1: 2 "+str(author_brut))
                     author = re.sub(r'(,|\.)', '', author_brut)
-                    log.debug("author_1: 3", author)
+                    log.debug("author_1: 3 "+str(author))
                     author_sub = re.sub(r'(^\w+\b \w)', "", author)
 
-                    log.debug("author_1: 4", author_sub)
+                    log.debug("author_1: 4 "+str(author_sub))
                     author_final = re.sub(author_sub, "", author)
-                    log.debug("author_1: 5", author_final)
+                    log.debug("author_1: 5 "+str(author_final))
                     AUTHOR = author_final.upper()
-                    log.debug("author_1: 6", AUTHOR)
+                    log.debug("author_1: 6 "+str(AUTHOR))
                     AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                    log.debug("author_1: 7", AUTHOR)
+                    log.debug("author_1: 7 "+str(AUTHOR))
                     AUTHOR = re.sub(r'(b|\|\.|\')', '', str(AUTHOR))
-                    log.debug("author_1: 8")
+                    log.debug("author_1: 8 ")
                     return AUTHOR
                 else:
                     log.debug("author_1: Author -", author_brut)
@@ -415,8 +425,15 @@ class ScienceDirectArticle(ASSArticle):
 
         text_sub = re.sub(r'(1\.1|2)\W.*', '', text_1)
         # print ("\n2eme étape :",text_sub)
-
-        if "serial JL" in text_sub:
+        
+        if txt_1==".*":
+            
+            log.warning("Fail AUTHOR => text_cleaner")
+            return ass_scrap_util.text_cleaner(txt)
+            
+            
+        if "serial JL" in text_sub :
+            print("serial JL")
             # print ("Syntax author")
             # title = self.concat_title()
             # print(type(title))
@@ -440,11 +457,14 @@ class ScienceDirectArticle(ASSArticle):
             text_alone = re.sub(r'[^a-zA-Z0-9_ ]', "", text_alone)
             log.debug("text : 6,5")
             text_alone = ass_scrap_util.text_cleaner(text_alone)
-            text_alone = re.sub(r'( References).*', "", text_alone)
+            text_alone = re.sub(r'(References(?!.*References)).*',' ', text_alone)
+            text_alone = re.sub(r'(Appendix(?!.*Appendix)).*',' ', text_alone)
             log.debug("text : 7")
             # cln_txt = text_cleaner(txt)
             return text_alone
 
+    
+    
     def keywords(self):
         """Gets the document's Keywords"""
         try:
@@ -452,5 +472,5 @@ class ScienceDirectArticle(ASSArticle):
             KW_list = [item['$'] for item in kw]
             return KW_list
         except KeyError:
-            KW_list = ["No Keyword"]
+            KW_list = "No Keyword"
             return KW_list

@@ -45,11 +45,12 @@ print(len(List_PII))
 
 r=50
 list_rdm = random.sample(List_PII,r) + random.sample(List_PII_RTM,r)
-#list_rdm = ["S0304380005004527"]
+#list_rdm = ["S0304380002001795"]
 print ("PII list : ",list_rdm)
 
 
 def test_get_articles(i,list):   
+    
     for i in list:
         
         logging.debug("Phase 1")
@@ -58,7 +59,7 @@ def test_get_articles(i,list):
         if ass_doc.is_undesired():
             logging.warning("Filtred document => meaningless")
             continue
-        if ass_doc.author_1 is False:
+        if ass_doc.author_1() is False:
             logging.warning("Filtred document => author error")
             continue
         else:
