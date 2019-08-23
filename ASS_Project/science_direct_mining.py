@@ -34,7 +34,7 @@ client = ElsClient(config['apikey'])
 #with open(os.getcwd()+"/../list_pii_EM.json") as json_file:
 #    pii_code = json.load(json_file)
 # 
-with open(os.getcwd()+"/../list_achievment.json") as json_file:
+with open(os.getcwd()+"/list_achievment.json") as json_file:
     pii_code = json.load(json_file)
 
 
