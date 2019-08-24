@@ -34,7 +34,7 @@ client = ElsClient(config['apikey'])
 #with open(os.getcwd()+"/../list_pii_EM.json") as json_file:
 #    pii_code = json.load(json_file)
 # 
-with open(os.getcwd()+"/list_achievment.json") as json_file:
+with open(os.getcwd()+"/list_a.json") as json_file:
     pii_code = json.load(json_file)
 
 
@@ -54,7 +54,7 @@ list_rdm = List_PII
 def JsonList(y) :
     
     liste = json.dumps(y)
-    with open('list_achievment.json','w') as outfile:  
+    with open('list_a.json','w') as outfile:  
         json.dump(liste,outfile)
 
 def test_get_articles(i,list):   
