@@ -31,7 +31,7 @@ page = bs4.BeautifulSoup(req_text, "lxml")
 itr = 0
 condition = False
 
-tp = Path(os.getcwd() + "/data/")
+tp = Path(os.getcwd() + "/data/articles/")
 
 for gen in page.findAll("p", {'class': 'item'}):
     itr += 1
