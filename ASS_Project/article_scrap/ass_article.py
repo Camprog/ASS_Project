@@ -102,13 +102,13 @@ class JasssArticle(ASSArticle):
         else:
             basic_url = ass_scrap_util.base_url + str(args[0]) + ass_scrap_util.separator + str(
                 args[1]) + ass_scrap_util.separator
-            req = requests.get(basic_url + str(args[2]) + ass_scrap_util.html)
+            req = requests.get(basic_url + str(args[2]) + ".html")
             self.url = req.url
             if req.status_code == requests.codes.ok:
                 self.bs_article = BeautifulSoup(req.content, 'html5lib')
             else:
                 self.bs_article = BeautifulSoup(
-                    requests.get(basic_url + str("review" + args[2]) + ass_scrap_util.html),
+                    requests.get(basic_url + str("review" + args[2]) + ".html"),
                     'html5lib')
 
     def __repr__(self):
@@ -121,22 +121,27 @@ class JasssArticle(ASSArticle):
     def keywords(self):
         """
         Get the key worlds from an article
-        :param html bs_article:
         :return: a tuple made of key worlds
         """
-        return [x.strip() for x in self.get_meta_content_with_tag("tags").split(',')]
+        k = self.get_meta_content_with_tag("tags")
+        if not k:
+            k = self.bs_article.find(string="Keywords:").find_next_sibling()
+        return [x.strip() for x in k.split(',')]
 
     def title(self):
         """ Retrieve the title of the article """
-        return self.get_meta_content_with_tag()
+        t = self.get_meta_content_with_tag()
+        return t if t else self.get_art_content_with_tag()
 
     def authors(self):
         """
         Retrieve the authors of the article
-        :param html bs_article:
         :return: a tuple of authors
         """
-        return [x.strip() for x in self.get_meta_content_with_tag("authors").split(';')]
+        a = self.get_meta_content_with_tag("authors")
+        if not a:
+            a = self.get_art_content_with_tag("authors")
+        return [x.strip() for x in a.split(';')]
 
     def abstract(self):
         """ Retrieve the abstract of the article"""
@@ -196,6 +201,12 @@ class JasssArticle(ASSArticle):
         :return: The plain text of the article
         """
         html_text = self._text()
+        script: BeautifulSoup.Tag = html_text.findAll("script")
+        if not script:
+            pass
+        else:
+            for s in script:
+                s.extract()
         bibliography: BeautifulSoup.Tag = html_text.findAll("div", {'id': 'refs'})
         log.debug("Looking for the bibilography div: "+str(bibliography))
         if not bibliography:
@@ -252,6 +263,14 @@ class JasssArticle(ASSArticle):
         if tag == "doi":
             result = result.contents[0].replace('DOI:', '')
         return result.strip()
+
+    def get_content_with_tag(self, tag="title"):
+        """
+        Retrieve the content associated with a conceptual tag that does not exist in JASSS HTML format (old artilces)
+        :param tag: the part of the article to look for (default = 'title')
+        :return: a string representation of requested part of the article
+        """
+
 
     def get_soup(self):
         """
