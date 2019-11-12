@@ -31,7 +31,7 @@ page = bs4.BeautifulSoup(req_text, "lxml")
 itr = 0
 condition = False
 
-tp = Path(os.getcwd() + "/data/")
+tp = Path(os.getcwd() + "/data/articles/")
 
 the_old_article = JasssArticle(13, 1, 14)
 the_old_article.save(str(tp)+"/test_old_article.txt")

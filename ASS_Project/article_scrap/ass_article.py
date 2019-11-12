@@ -9,13 +9,16 @@ from requests import HTTPError
 
 from article_scrap import ass_scrap_util
 
+from article_scrap import ass_scrap_util
+from article_scrap.ass_scrap_util import text_cleaner
 import re
 import unicodedata
 
 import logging
 
+
 log = logging.getLogger("ass")
-log.setLevel(logging.WARNING)
+log.setLevel(logging.INFO)
 
 
 class ASSArticle:
@@ -305,13 +308,21 @@ class ScienceDirectArticle(ASSArticle):
             return ass_scrap_util.doi_converter(doi)
 
     def issn(self):
-        pass
-
+        try:
+            issn = self._sd_article.data["coredata"]["prism:issn"]
+            return issn
+        except KeyError:
+            return "No ISSN"
+            
     def title(self):
         """Gets the document's title"""
-        sd_title = re.sub("/", " ", self._sd_article.title)
+        try:
+            sd_title = re.sub("/", " ", self._sd_article.title)
         # log.info("Check title",sd_title)
-        return sd_title
+            return sd_title
+        except KeyError:
+            return "No Title"
+        
 
     def abstract(self):
         """Gets the document's abstract"""
@@ -320,7 +331,10 @@ class ScienceDirectArticle(ASSArticle):
     def is_undesired(self):
         """ Tells if this article is undesired or not """
         title_revue = self.title()
-        try:
+        try:   
+            if "Erratum to" in title_revue:
+                log.info("Erratum")
+                return True
             if "Editorial" in title_revue:
                 log.info("Editorial")
                 return True
@@ -333,6 +347,9 @@ class ScienceDirectArticle(ASSArticle):
             if "Subject Index" in title_revue:
                 log.info("Subject Index")
                 return True
+            if "Author Index" in title_revue:
+                log.info("Author Index")
+                return True
             if "Preface" in title_revue:
                 log.info("Preface")
                 return True
@@ -344,6 +361,21 @@ class ScienceDirectArticle(ASSArticle):
                 return True
             if "Author index" in title_revue:
                 log.info("Author index")
+                return True
+            if "Editorial" in self._sd_article.data["coredata"]["pubType"]:
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
+                return True
+            if "Short communication" in self._sd_article.data["coredata"]["pubType"]:
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
+                print("Short communication")
+            if "Preface" in self._sd_article.data["coredata"]["pubType"]:
+                log.info(str(self._sd_article.data["coredata"]["pubType"]))
+                return True
+            if "Corrigendum to" in title_revue:
+                log.info("Corrigendum to")
+                return True
+            if "Announcement" in title_revue:
+                log.info("Annoucement")
                 return True
 
         except KeyError:
@@ -367,20 +399,20 @@ class ScienceDirectArticle(ASSArticle):
             try:
                 author_brut = self._sd_article.data["coredata"]["dc:creator"][0]["$"]
                 if author_brut:
-                    log.debug("author_1: 2", author_brut)
+                    log.debug("author_1: 2 "+str(author_brut))
                     author = re.sub(r'(,|\.)', '', author_brut)
-                    log.debug("author_1: 3", author)
+                    log.debug("author_1: 3 "+str(author))
                     author_sub = re.sub(r'(^\w+\b \w)', "", author)
 
-                    log.debug("author_1: 4", author_sub)
+                    log.debug("author_1: 4 "+str(author_sub))
                     author_final = re.sub(author_sub, "", author)
-                    log.debug("author_1: 5", author_final)
+                    log.debug("author_1: 5 "+str(author_final))
                     AUTHOR = author_final.upper()
-                    log.debug("author_1: 6", AUTHOR)
+                    log.debug("author_1: 6 "+str(AUTHOR))
                     AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
-                    log.debug("author_1: 7", AUTHOR)
+                    log.debug("author_1: 7 "+str(AUTHOR))
                     AUTHOR = re.sub(r'(b|\|\.|\')', '', str(AUTHOR))
-                    log.debug("author_1: 8")
+                    log.debug("author_1: 8 ")
                     return AUTHOR
                 else:
                     log.debug("author_1: Author -", author_brut)
@@ -392,8 +424,26 @@ class ScienceDirectArticle(ASSArticle):
                     AUTHOR = re.sub(r'(b|\|\.|\')', '', str(AUTHOR))
                     return AUTHOR
             except KeyError:
-                log.warning("Author Error => KeyError")
-                return False
+                    try:
+                        author_brut = self._sd_article.data["coredata"]["dc:creator"]["$"]
+                        log.debug("author_1: 2 "+str(author_brut))
+                        author = re.sub(r'(,|\.)', '', author_brut)
+                        log.debug("author_1: 3 "+str(author))
+                        author_sub = re.sub(r'(^\w+\b \w)', "", author)
+                    
+                        log.debug("author_1: 4 "+str(author_sub))
+                        author_final = re.sub(author_sub, "", author)
+                        log.debug("author_1: 5 "+str(author_final))
+                        AUTHOR = author_final.upper()
+                        log.debug("author_1: 6 "+str(AUTHOR))
+                        AUTHOR = unicodedata.normalize('NFD', AUTHOR).encode('ASCII', 'ignore')
+                        log.debug("author_1: 7 "+str(AUTHOR))
+                        AUTHOR = re.sub(r'(b|\|\.|\')', '', str(AUTHOR))
+                        log.debug("author_1: 8 ")
+                        return AUTHOR
+                    except KeyError:
+                        log.warning("Author Error => KeyError")
+                        return False
 
         else:
             log.warning("Author_checking false")
@@ -428,9 +478,17 @@ class ScienceDirectArticle(ASSArticle):
         log.debug("text : 5")
 
         text_sub = re.sub(r'(1\.1|2)\W.*', '', text_1)
+        print (txt_1)
         # print ("\n2eme étape :",text_sub)
-
-        if "serial JL" in text_sub:
+        
+        if len(txt_1)<=5:
+            
+            log.warning("Fail AUTHOR => text_cleaner")
+            return ass_scrap_util.text_cleaner(txt)
+            
+            
+        if "serial JL" in text_sub :
+            print("serial JL")
             # print ("Syntax author")
             # title = self.concat_title()
             # print(type(title))
@@ -449,16 +507,20 @@ class ScienceDirectArticle(ASSArticle):
             return ass_scrap_util.text_cleaner(txt)
 
         else:
-            text_alone = re.sub(r'.*%s' % text_sub, "", text_1)
+            text_alone = re.sub(r'.*%s'%text_sub, "", text_1)
             log.debug("text : 6")
             text_alone = re.sub(r'[^a-zA-Z0-9_ ]', "", text_alone)
             log.debug("text : 6,5")
             text_alone = ass_scrap_util.text_cleaner(text_alone)
-            text_alone = re.sub(r'( References).*', "", text_alone)
+            #text_alone = re.sub(r'(References(?!.*References)).*',' ', text_alone)
+            #text_alone = re.sub(r'(Appendix(?!.*Appendix)).*',' ', text_alone)
+            #clean_txt = re.sub(r'(Appendix(?!.*Appendix)).*',' ', clean_txt)
             log.debug("text : 7")
             # cln_txt = text_cleaner(txt)
             return text_alone
 
+    
+    
     def keywords(self):
         """Gets the document's Keywords"""
         try:
@@ -466,5 +528,5 @@ class ScienceDirectArticle(ASSArticle):
             KW_list = [item['$'] for item in kw]
             return KW_list
         except KeyError:
-            KW_list = ["No Keyword"]
+            KW_list = "No Keyword"
             return KW_list
