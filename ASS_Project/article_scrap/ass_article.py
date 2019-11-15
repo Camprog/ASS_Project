@@ -119,7 +119,9 @@ class JasssArticle(ASSArticle):
 
     def is_review(self):
         """ Tells if this article is a review or not """
-        return True if "review" in self.__repr__() else False
+        return True if "review" in self.__repr__() \
+                       or not ass_scrap_util.get_issue_from_url(self.__repr__())[-1].isdigit() \
+            else False
 
     def keywords(self):
         """
@@ -128,7 +130,8 @@ class JasssArticle(ASSArticle):
         """
         k = self.get_meta_content_with_tag("tags")
         if not k:
-            k = self.bs_article.find(string="Keywords:").find_next_sibling()
+            balise = self.bs_article.find(string="Keywords:")
+            k = balise.find_next_sibling() if balise.find_next_sibling() else balise.find_next().string
         return [x.strip() for x in k.split(',')]
 
     def title(self):
@@ -153,7 +156,9 @@ class JasssArticle(ASSArticle):
         if len(the_abstract.split()) < 5:
             sub_abs = self.bs_article.find(string="Abstract")
             if sub_abs:
-                return str(sub_abs.findNext("dl").next.contents[0]).strip()
+                b1 = sub_abs.findNext("dd").next
+                b2 = sub_abs.findNext("dl").next
+                return str(b1).strip() if b1 else (str(b2.contents[0]).strip if len(b2) > 0 else super().NA)
             else:
                 return super().NA
         return the_abstract
@@ -172,7 +177,7 @@ class JasssArticle(ASSArticle):
             doi = self.get_meta_content_with_tag("doi")
         except TypeError:
             doi = self.get_art_content_with_tag("doi")
-        return doi
+        return doi if doi else ass_scrap_util.get_issue_from_url(self.__repr__())
 
     def _text(self):
         body = self.bs_article.findAll("article")
@@ -210,6 +215,8 @@ class JasssArticle(ASSArticle):
         else:
             for s in script:
                 s.extract()
+                for n in s.find_next_siblings():
+                    n.extract()
         bibliography: BeautifulSoup.Tag = html_text.findAll("div", {'id': 'refs'})
         log.debug("Looking for the bibilography div: "+str(bibliography))
         if not bibliography:
@@ -261,10 +268,11 @@ class JasssArticle(ASSArticle):
         if tag == "doi":
             balise = "span"
         result = self.bs_article.find(balise, {'class': ass_scrap_util.art[tag]})
+        log.debug(result)
         if result is None:
             return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
         if tag == "doi":
-            result = result.contents[0].replace('DOI:', '')
+            result = result.contents[0].replace('DOI:', '') if result else super().NA
         return result.strip()
 
     def get_content_with_tag(self, tag="title"):

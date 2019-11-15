@@ -48,18 +48,27 @@ def get_any_url():
     return random.choice(list_of_url).find("a")['href']
 
 
+def get_issue_from_url(url):
+    """
+    Retrieve number of issue, volume, article
+    :param url: the url to be inspected
+    :return: a list of numbers
+    """
+    issue = str(url).split("/")
+    return [issue[-3], issue[-2], issue[-1].replace(".html", "")]
+
+
 def doi_converter(article_doi):
     """
     
     :param article_doi: the DOI as a string
     :return: the_doi converted from or to encoding version
     """
-    if article_doi == "NA" or re.match("[0-9]-[0-9]-[0-9]", article_doi):
-        return article_doi
-    elif "/" in article_doi:
+    if "/" in article_doi:
         return article_doi.replace("/", slash_conversion)
     elif slash_conversion in article_doi:
         return article_doi.replace(slash_conversion, "/")
+    return article_doi
 
 
 def clean_text(text, regex_replace_dict: dict):
