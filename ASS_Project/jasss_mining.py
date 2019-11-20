@@ -36,12 +36,14 @@ condition = False
 
 tp = Path(os.getcwd() + "/data")
 
-rtcl = [18, 3, 3]
+rtcl = [4, 1, 1]
+
+#no_doi_article = [12, 4, 13]
 
 #the_old_article = JasssArticle(rtcl[0], rtcl[1], rtcl[2])
 #the_old_article.save(str(tp)+"/test_old_article.txt")
 
-goon = False
+goon = True
 for gen in page.findAll("p", {'class': 'item'}):
     itr += 1
     url_article = gen.find("a")['href']
@@ -49,11 +51,12 @@ for gen in page.findAll("p", {'class': 'item'}):
     url_issue = [e for e in fall(r"[\w']+", url_article) if e.isdigit()]
 
     if url_issue == [str(rtcl[0]), str(rtcl[1]), str(rtcl[2])]:
-         goon = False
+        goon = False
     if goon:
-         continue
+        continue
 
-    log.info(round(str(itr)/nb_max, 2) + "% => " + url_article + " | " + str(url_issue) + " review = "+rvw)
+    prop = round(itr/nb_max*100, 4)
+    log.info(str(prop) + "% => " + url_article + " | " + str(url_issue) + " review = " + str(rvw))
     try:
         article = JasssArticle(url=url_article)
     except HTTPError as e:

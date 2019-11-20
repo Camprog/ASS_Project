@@ -128,16 +128,22 @@ class JasssArticle(ASSArticle):
         Get the key worlds from an article
         :return: a tuple made of key worlds
         """
-        k = self.get_meta_content_with_tag("tags")
-        if not k:
+        try:
+            k = self.get_meta_content_with_tag("tags")
+        except TypeError:
             balise = self.bs_article.find(string="Keywords:")
             k = balise.find_next_sibling() if balise.find_next_sibling() else balise.find_next().string
         return [x.strip() for x in k.split(',')]
 
     def title(self):
         """ Retrieve the title of the article """
-        t = self.get_meta_content_with_tag()
-        return t if t else self.get_art_content_with_tag()
+        try:
+            t = self.get_meta_content_with_tag()
+        except TypeError:
+            t = self.get_art_content_with_tag()
+        t = self.bs_article.find("title").string if t == super().NA else t
+        log.debug("Title is : "+t)
+        return t
 
     def authors(self):
         """
@@ -151,16 +157,18 @@ class JasssArticle(ASSArticle):
 
     def abstract(self):
         """ Retrieve the abstract of the article"""
-        the_abstract = self.get_meta_content_with_tag("abstract")
-
-        if len(the_abstract.split()) < 5:
-            sub_abs = self.bs_article.find(string="Abstract")
-            if sub_abs:
-                b1 = sub_abs.findNext("dd").next
-                b2 = sub_abs.findNext("dl").next
-                return str(b1).strip() if b1 else (str(b2.contents[0]).strip if len(b2) > 0 else super().NA)
-            else:
-                return super().NA
+        the_abstract = super().NA
+        try:
+            the_abstract = self.get_meta_content_with_tag("abstract")
+        except TypeError:
+            if (the_abstract == super().NA) or len(the_abstract.split()) < 5:
+                sub_abs = self.bs_article.find(string="Abstract")
+                if sub_abs:
+                    b1 = sub_abs.findNext("dd").next
+                    b2 = sub_abs.findNext("dl").next
+                    return str(b1).strip() if b1 else (str(b2.contents[0]).strip if len(b2) > 0 else super().NA)
+                else:
+                    return the_abstract
         return the_abstract
 
     def issn(self):
@@ -268,10 +276,12 @@ class JasssArticle(ASSArticle):
         if tag == "doi":
             balise = "span"
         result = self.bs_article.find(balise, {'class': ass_scrap_util.art[tag]})
-        log.debug(result)
         if result is None:
-            return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
-        if tag == "doi":
+            if tag == "doi":
+                return "-".join([str(s) for s in self.__repr__() if s.isdigit()])
+            else:
+                return super().NA
+        elif tag == "doi":
             result = result.contents[0].replace('DOI:', '') if result else super().NA
         return result.strip()
 
