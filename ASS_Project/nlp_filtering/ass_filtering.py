@@ -6,19 +6,19 @@ from ASS_Project.article_scrap.ass_article import ASSArticle
 log = logging.getLogger("filtering")
 log.setLevel(logging.INFO)
 
-T = "title"
-A = "abstract"
-C = "content"
+TITLE = "title"
+ABSTRACT = "abstract"
+CONTENT = "content"
+DISTANCE_COEFFICIENT = "match_distance_coefficient"
 
-P = "perfect_match"
-R = "relative_match"
+DEFAULT_SCORE_MATRIX = {TITLE: 1, ABSTRACT: 0.8, CONTENT: 0.5, DISTANCE_COEFFICIENT: 1 / 2}
 
 
 class ASSFilter:
-    _score_matrix = {T: 1, A: 0.8, C: 0.5, P: 1, R: 0.5}
-    _matches = {}
+    _score_matrix: dict = {}
+    _matches: list = []
 
-    def __init__(self, matrix=_score_matrix, *args):
+    def __init__(self, matrix=DEFAULT_SCORE_MATRIX, *args):
         """
         In order to init filters you need a set of matches words and/or sentences
         :type args: string
@@ -26,7 +26,7 @@ class ASSFilter:
         self._score_matrix = matrix
         self._matches = args
 
-    def filter(self, score_threshold=-1, score_ratio=0.0, article_count=0, *args):
+    def filter(self, score_threshold=1, score_ratio=0.0, article_count=0, *args):
         """
         To filter a given set of article (ASSArticle)
         :param self:
@@ -41,10 +41,9 @@ class ASSFilter:
             score = self.get_score(a)
             if score > score_threshold:
                 dic[a] = score
-        # TODO : find the score_ratio actual score and filter list accordingly
-        min_score = 1 + score_ratio
-        dic = dict(filter(lambda x: dic[x] > min_score))
-        return dic.keys()[-article_count]
+        article_ratio = len(dic) * score_ratio
+        listed_article = sorted(dic.items(), key=lambda kv: (kv[1], kv[0]))
+        return listed_article[-(article_count if article_count < article_ratio else article_ratio):-1]
 
     def get_score(self, article):
         """
@@ -54,54 +53,33 @@ class ASSFilter:
         :return: the score of the article
         """
         if article is not ASSArticle:
-            raise ValueError("article argument must be of "+ASSArticle+" type")
-        t_score = self.get_section_score(ASSArticle(article).title(), T)
-        a_score = self.get_section_score(ASSArticle(article).abstract(), A)
-        c_score = self.get_section_score(ASSArticle(article).text(), C)
-        return {t_score, a_score, c_score}
+            raise ValueError("article argument must be of " + ASSArticle + " type")
+        t_score = self.get_match_score(ASSArticle(article).title(), TITLE)
+        a_score = self.get_match_score(ASSArticle(article).abstract(), ABSTRACT)
+        c_score = self.get_match_score(ASSArticle(article).text(), CONTENT)
+        return t_score * self._score_matrix[TITLE] + \
+               a_score * self._score_matrix[ABSTRACT] + \
+               c_score * self._score_matrix[CONTENT]
 
-    def get_section_score(self, text, section=T):
+    def get_match_score(self, text, section=TITLE):
         """
-        Get the score associated with a particular section of the article
-        :param self: the filter
-        :param text: the text to account matches for
-        :param section: the specific section of article to look for among \{"title", "abstract", "content"\}
-        :return: the score associated to a particular section of a given article
-        """
-        if not any(section = s for s in {T, A, C}):
-            raise ValueError("section argument must match one article entry: "+{T, A, C})
-        s = self.get_perfect_match(text)
-        s = s if s > 0 else self.get_relative_match(text)
-        return s * self._score_matrix[section]
-
-    def get_perfect_match(self, text):
-        """
-        Score for a perfect match (exact same sequence of characters)
-        :param self: the filter
-        :param text: the text section to look matches for
-        :return: the score
-        """
-        s = 0
-        for m in self._matches:
-            s += self._score_matrix[P] if re.search(m, text) else 0
-        return s
-
-    def get_relative_match(self, text):
-        """
-        TODO : make relative score relative to the distance (word distance) between part of a match
+        Get relative score according to weights (_score_matrix) and textual distance
+        :param section: the section of article to scored
         :param text: the text to look match in
         :return: the relative match score
         """
+        if not any(section == s for s in {TITLE, ABSTRACT, CONTENT}):
+            raise ValueError("section argument must match one article entry: " + {TITLE, ABSTRACT, CONTENT})
         s = 0
         for m in self._matches:
             ms = m.split()
             if len(ms) > 1:
                 i = 0
                 while i < ms - 1:
-                    s += 1 / self.distance(text, ms[i], ms[i+1])
+                    s += 1 / (self.distance(text, ms[i], ms[i + 1]) ** self._score_matrix[DISTANCE_COEFFICIENT])
             else:
-                s += self._score_matrix[P] if re.search(m, text) else 0
-        return s * self._score_matrix[R]
+                s += 1 if re.search(m, text) else 0
+        return s * self._score_matrix[section]
 
     @staticmethod
     def distance(s, w1, w2):
@@ -142,12 +120,10 @@ class ASSFilter:
                 # Also check if this value is smaller than
                 # minimum distance so far
                 if words[prev] != words[i] and (i - prev) < min_dist:
-                    min_dist = i - prev - 1
+                    min_dist = i - prev
                     prev = i
                 else:
                     prev = i
             i += 1
 
         return min_dist
-
-
