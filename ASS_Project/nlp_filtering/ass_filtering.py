@@ -11,39 +11,42 @@ ABSTRACT = "abstract"
 CONTENT = "content"
 DISTANCE_COEFFICIENT = "match_distance_coefficient"
 
-DEFAULT_SCORE_MATRIX = {TITLE: 1, ABSTRACT: 0.8, CONTENT: 0.5, DISTANCE_COEFFICIENT: 1 / 2}
+DEFAULT_SCORE_MATRIX = {TITLE: 1, ABSTRACT: 0.8, CONTENT: 0.5, DISTANCE_COEFFICIENT: 0.5}
 
 
 class ASSFilter:
     _score_matrix: dict = {}
     _matches: list = []
 
-    def __init__(self, matrix=DEFAULT_SCORE_MATRIX, *args):
+    def __init__(self, *args, matrix=DEFAULT_SCORE_MATRIX):
         """
         In order to init filters you need a set of matches words and/or sentences
         :type args: string
         """
+        log.debug("Matrix = "+str(matrix[TITLE]))
         self._score_matrix = matrix
-        self._matches = args
+        log.debug("Matches = "+str(args))
+        self._matches = [m for m in args]
 
-    def filter(self, score_threshold=1, score_ratio=0.0, article_count=0, *args):
+    def filter(self, articles, score_threshold=1, score_ratio=0.0, article_count=0):
         """
         To filter a given set of article (ASSArticle)
-        :param self:
+        :param articles: the set of articles to filter
         :param score_threshold: the score threshold
         :param score_ratio: the score ratio to filter
         :param article_count: the number of article you want to get
-        :param args: the set of articles to filter
         :return: the filtered set of articles
         """
         dic: dict = {}
-        for a in args:
+        for a in articles:
             score = self.get_score(a)
             if score > score_threshold:
                 dic[a] = score
-        article_ratio = len(dic) * score_ratio
+        article_ratio = int(len(dic) * score_ratio)
+        article_ratio = article_ratio if (article_count == 0 or article_count > article_ratio) else article_count
+        log.debug("Expected number of filtered article "+str(article_ratio)+" over "+str(len(dic)))
         listed_article = sorted(dic.items(), key=lambda kv: (kv[1], kv[0]))
-        return listed_article[-(article_count if article_count < article_ratio else article_ratio):-1]
+        return listed_article[-article_ratio:-1]
 
     def get_score(self, article):
         """
@@ -52,11 +55,11 @@ class ASSFilter:
         :param article: the article to have score of
         :return: the score of the article
         """
-        if article is not ASSArticle:
+        if isinstance(article, ASSArticle):
             raise ValueError("article argument must be of " + ASSArticle + " type")
-        t_score = self.get_match_score(ASSArticle(article).title(), TITLE)
-        a_score = self.get_match_score(ASSArticle(article).abstract(), ABSTRACT)
-        c_score = self.get_match_score(ASSArticle(article).text(), CONTENT)
+        t_score = self.get_match_score(article.title(), TITLE)
+        a_score = self.get_match_score(article.abstract(), ABSTRACT)
+        c_score = self.get_match_score(article.text(), CONTENT)
         return t_score * self._score_matrix[TITLE] + \
                a_score * self._score_matrix[ABSTRACT] + \
                c_score * self._score_matrix[CONTENT]
@@ -75,10 +78,13 @@ class ASSFilter:
             ms = m.split()
             if len(ms) > 1:
                 i = 0
-                while i < ms - 1:
-                    s += 1 / (self.distance(text, ms[i], ms[i + 1]) ** self._score_matrix[DISTANCE_COEFFICIENT])
+                while i < len(ms) - 1:
+                    dist = self.distance(text, ms[i], ms[i + 1])
+                    if dist > 0:
+                        s += 1 / (dist ** self._score_matrix[DISTANCE_COEFFICIENT])
+                    i += 1
             else:
-                s += 1 if re.search(m, text) else 0
+                s += 1 if re.search(m, text, re.IGNORECASE) else 0
         return s * self._score_matrix[section]
 
     @staticmethod
@@ -106,20 +112,20 @@ class ASSFilter:
         # this occurrence in prev
         for i in range(n):
 
-            if words[i] == w1 or words[i] == w2:
+            if ASSFilter.safe_match(words[i], w1) or ASSFilter.safe_match(words[i], w2):
                 prev = i
                 break
 
         # Traverse after the first occurrence
         while i < n:
-            if words[i] == w1 or words[i] == w2:
+            if ASSFilter.safe_match(words[i], w1) or ASSFilter.safe_match(words[i], w2):
 
                 # If the current element matches with
                 # any of the two then check if current
                 # element and prev element are different
                 # Also check if this value is smaller than
                 # minimum distance so far
-                if words[prev] != words[i] and (i - prev) < min_dist:
+                if not ASSFilter.safe_match(words[prev], words[i]) and (i - prev) < min_dist:
                     min_dist = i - prev
                     prev = i
                 else:
@@ -127,3 +133,10 @@ class ASSFilter:
             i += 1
 
         return min_dist
+
+    @staticmethod
+    def safe_match(w1, w2):
+        try:
+            return re.match(w1, w2, re.IGNORECASE)
+        except re.error:
+            return w1 == w2
