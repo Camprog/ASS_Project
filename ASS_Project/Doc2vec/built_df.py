@@ -11,6 +11,12 @@ import os
 import re
 import pandas as pd
 import yaml
+from nltk.corpus import stopwords 
+from nltk.tokenize import word_tokenize 
+import json
+import csv
+from nltk.stem import PorterStemmer 
+from nltk.tokenize import word_tokenize 
 
 """
 ###########
@@ -19,12 +25,13 @@ Add in data folder a folder named "df" and create df_articles.csv in df folder
 
 ############
 """
+stop_words = set(stopwords.words('english'))
 
 mon_dictionnaire = {}
 df_articles = pd.DataFrame()
 
-a = 1
-b = 7290
+a = 2000
+b = 7000
 for i in range (a,b):
     with open(os.getcwd()+"/data/articles_7250/article_%s.txt"%i, "r") as article:
         data = article.read()  
@@ -41,6 +48,22 @@ for i in range (a,b):
         content_raw = re.sub(r"  "," ",content_raw)
         content_raw = re.sub(r","," ",content_raw)
         content_raw = re.sub(r"\d"," ",content_raw)
+        content_raw = re.sub(r"( \w\w )|( \w )"," ",content_raw)
+        content_raw = re.sub(r"( \w\w )|( \w )"," ",content_raw)
+        content_raw = re.sub(r"( \w\w )|( \w )"," ",content_raw)
+        
+        
+        
+        words = content_raw.split() 
+        content_filtered = []
+        for w in words:
+            if w not in stop_words:
+                content_filtered.append(w)
+     
+        content_raw = " ".join(content_filtered)
+        content_raw = str(content_raw)
+        #print(type(content_raw))
+        #print (content_raw)
         
         
     except :
@@ -55,7 +78,7 @@ for i in range (a,b):
     try : 
         kw_raw = data_dict.get("KEYWORDS")
         kw_raw = str (kw_raw)
-        kw_raw = re.sub(r"\[|\]|\'|\,"," ",kw_raw)
+        kw_raw = re.sub(r"\[|\]|\'|\,|\;"," ",kw_raw)
     except :
         kw_raw = "none"
         
@@ -79,6 +102,16 @@ for i in range (a,b):
         abstract_raw = re.sub(r"\d"," ",abstract_raw)
         abstract_raw = re.sub(r"\n"," ",abstract_raw)
         abstract_raw = re.sub(r"^abstract"," ",abstract_raw)
+        abstract_raw = re.sub(r"( \w\w )|( \w )"," ",abstract_raw)
+        abstract_raw = str(abstract_raw)
+        
+        words_a = abstract_raw.split() 
+        content_filtered_a = []
+        for w in words_a:
+            if w not in stop_words:
+                content_filtered_a.append(w)
+     
+        abstract_raw = " ".join(content_filtered_a)
         
     except :
         abstract_raw = "none"     
@@ -92,6 +125,6 @@ for i in range (a,b):
             }
     
     df_articles = df_articles.append(dict_data, ignore_index=True)
-    #print (int((i/b)*100),"%")
+    print ((i/b)*100,"%")
 print (df_articles)
-df_articles.to_csv(r'data/df/df_articles.csv')
+df_articles.to_csv(r'data/df/df_articles_9.csv')
