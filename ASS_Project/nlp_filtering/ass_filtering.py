@@ -17,16 +17,18 @@ DEFAULT_SCORE_MATRIX = {TITLE: 1, ABSTRACT: 0.8, CONTENT: 0.5, DISTANCE_COEFFICI
 class ASSFilter:
     _score_matrix: dict = {}
     _matches: list = []
+    _matches_weight: list = []
 
     def __init__(self, *args, matrix=DEFAULT_SCORE_MATRIX):
         """
         In order to init filters you need a set of matches words and/or sentences
         :type args: string
         """
-        log.debug("Matrix = "+str(matrix[TITLE]))
+        log.debug("Matrix = " + str(matrix[TITLE]))
         self._score_matrix = matrix
-        log.debug("Matches = "+str(args))
-        self._matches = [m for m in args]
+        log.debug("Matches = " + str(args))
+        self._matches = args[1:][::2]
+        self._matches_weight = args[::2]
 
     def filter(self, articles, score_threshold=1, score_ratio=0.0, article_count=0):
         """
@@ -44,7 +46,7 @@ class ASSFilter:
                 dic[a] = score
         article_ratio = int(len(dic) * score_ratio)
         article_ratio = article_ratio if (article_count == 0 or article_count > article_ratio) else article_count
-        log.debug("Expected number of filtered article "+str(article_ratio)+" over "+str(len(dic)))
+        log.debug("Expected number of filtered article " + str(article_ratio) + " over " + str(len(dic)))
         listed_article = sorted(dic.items(), key=lambda kv: (kv[1], kv[0]))
         return listed_article[-article_ratio:-1]
 
@@ -76,15 +78,17 @@ class ASSFilter:
         s = 0
         for m in self._matches:
             ms = m.split()
+            sm = 0
             if len(ms) > 1:
                 i = 0
                 while i < len(ms) - 1:
                     dist = self.distance(text, ms[i], ms[i + 1])
                     if dist > 0:
-                        s += 1 / (dist ** self._score_matrix[DISTANCE_COEFFICIENT])
+                        sm += 1 / (dist ** self._score_matrix[DISTANCE_COEFFICIENT])
                     i += 1
             else:
-                s += 1 if re.search(m, text, re.IGNORECASE) else 0
+                sm = 1 if re.search(m, text, re.IGNORECASE) else 0
+            s += sm * self._matches_weight[self._matches.index(m)]
         return s * self._score_matrix[section]
 
     @staticmethod
