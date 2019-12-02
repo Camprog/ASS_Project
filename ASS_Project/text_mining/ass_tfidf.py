@@ -1,4 +1,3 @@
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas
 import re
@@ -20,8 +19,8 @@ class ASSMiner:
         _articles = articles
         _asstfidf = tfidf
 
-    def tfidf(self, tdifd=_asstfidf):
-        return ASSMiner.sk_tfidf(self._articles) if re.match(tdifd, SKTFIDF, re.I) \
+    def tfidf(self, tfidf=_asstfidf):
+        return ASSMiner.sk_tfidf(self._articles) if re.match(tfidf, SKTFIDF, re.I) \
             else ASSMiner.ass_tfidf(self._articles)
 
     @staticmethod
