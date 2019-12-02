@@ -57,7 +57,7 @@ class ASSFilter:
         :param article: the article to have score of
         :return: the score of the article
         """
-        if isinstance(article, ASSArticle):
+        if not isinstance(article, ASSArticle):
             raise ValueError("article argument must be of " + ASSArticle + " type")
         t_score = self.get_match_score(article.title(), TITLE)
         a_score = self.get_match_score(article.abstract(), ABSTRACT)
