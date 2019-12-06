@@ -26,9 +26,10 @@ class ASSFilter:
         """
         log.debug("Matrix = " + str(matrix[TITLE]))
         self._score_matrix = matrix
-        log.debug("Matches = " + str(args))
-        self._matches = args[1:][::2]
-        self._matches_weight = args[::2]
+        self._matches = args[::2]
+        log.debug("Matches = " + str(self._matches))
+        self._matches_weight = args[1:][::2]
+        log.debug("Weights = " + str(self._matches_weight))
 
     def filter(self, articles, score_threshold=1, score_ratio=0.0, article_count=0):
         """
@@ -57,14 +58,15 @@ class ASSFilter:
         :param article: the article to have score of
         :return: the score of the article
         """
-        if not isinstance(article, ASSArticle):
-            raise ValueError("article argument must be of " + ASSArticle + " type")
-        t_score = self.get_match_score(article.title(), TITLE)
-        a_score = self.get_match_score(article.abstract(), ABSTRACT)
-        c_score = self.get_match_score(article.text(), CONTENT)
-        return t_score * self._score_matrix[TITLE] + \
-               a_score * self._score_matrix[ABSTRACT] + \
-               c_score * self._score_matrix[CONTENT]
+        try:
+            title = article.title()
+            abstract = article.abstract()
+            content = article.text()
+        except RuntimeError:
+            raise ValueError("Provided article is not a "+str(ASSArticle))
+        return self.get_match_score(title, TITLE) * self._score_matrix[TITLE] + \
+               self.get_match_score(abstract, ABSTRACT) * self._score_matrix[ABSTRACT] + \
+               self.get_match_score(content, CONTENT) * self._score_matrix[CONTENT]
 
     def get_match_score(self, text, section=TITLE):
         """
