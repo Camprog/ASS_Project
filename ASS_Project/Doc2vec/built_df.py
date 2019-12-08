@@ -61,7 +61,8 @@ for i in range (a,b):
                 content_filtered.append(w)
      
         content_raw = " ".join(content_filtered)
-        content_raw = str(content_raw)
+        
+        
         #print(type(content_raw))
         #print (content_raw)
         
