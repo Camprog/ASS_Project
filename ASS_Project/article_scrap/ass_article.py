@@ -340,7 +340,6 @@ class ScienceDirectArticle(ASSArticle):
             return sd_title
         except KeyError:
             return "No Title"
-        
 
     def abstract(self):
         """Gets the document's abstract"""
