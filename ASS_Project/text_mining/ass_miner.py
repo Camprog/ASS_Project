@@ -62,8 +62,7 @@ class ASSMiner:
         tfidf = tfidf if tfidf != "" else self._asstfidf
         corpus = [a.text() for a in self._articles]
         labels = self._articles if label_tag != ASSArticle.title_tag else [a.title() for a in self._articles]
-        return ASSMiner._sk_tfidf(corpus) if re.match(tfidf, SKTFIDF, re.I) \
-                else ASSMiner._ass_tfidf(corpus, labels)
+        return ASSMiner._sk_tfidf(corpus) if re.match(tfidf, SKTFIDF, re.I) else ASSMiner._ass_tfidf(corpus, labels)
 
     @staticmethod
     def _sk_tfidf(texts):

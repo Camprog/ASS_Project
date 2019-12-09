@@ -1,5 +1,6 @@
 import logging
 import re
+import pandas
 
 from ASS_Project.article_scrap.ass_article import ASSArticle
 
@@ -9,6 +10,8 @@ log.setLevel(logging.INFO)
 TITLE = "title"
 ABSTRACT = "abstract"
 CONTENT = "content"
+
+SCORE = "SCORE"
 DISTANCE_COEFFICIENT = "match_distance_coefficient"
 
 DEFAULT_SCORE_MATRIX = {TITLE: 1, ABSTRACT: 0.8, CONTENT: 0.5, DISTANCE_COEFFICIENT: 0.5}
@@ -40,8 +43,17 @@ class ASSFilter:
         :param article_count: the number of article you want to get
         :return: the filtered set of articles
         """
+        if isinstance(articles, pandas.DataFrame):
+            return self._df_scores(articles, score_threshold, score_ratio, article_count)
+        else:
+            return self._ass_scores(articles, score_threshold, score_ratio, article_count)
+
+    def _ass_scores(self, ass_articles, score_threshold, score_ratio, article_count):
+        """
+        Private method to filter ASSArticle according to scores
+        """
         dic: dict = {}
-        for a in articles:
+        for a in ass_articles:
             score = self.get_score(a)
             if score > score_threshold:
                 dic[a] = score
@@ -50,6 +62,19 @@ class ASSFilter:
         log.debug("Expected number of filtered article " + str(article_ratio) + " over " + str(len(dic)))
         listed_article = sorted(dic.items(), key=lambda kv: (kv[1], kv[0]))
         return listed_article[-article_ratio:-1]
+
+    def _df_scores(self, df_articles, score_threshold, score_ratio, article_count, labels=[]):
+        """
+        Private method to filter DataFrame according to the score of row based article
+        """
+        labels = labels if labels else [TITLE, ABSTRACT, CONTENT]
+        for i, row in df_articles.iterrows():
+            score = sum(self.get_meta_score(TAG) for TAG in labels)
+            if score > score_threshold:
+                row[SCORE] = score
+        article_ratio = int(len(df_articles.index) * score_ratio)
+        article_ratio = article_ratio if (article_count == 0 or article_count > article_ratio) else article_count
+        return df_articles.sort_values(SCORE, ascending=False).head(article_ratio)
 
     def get_score(self, article):
         """

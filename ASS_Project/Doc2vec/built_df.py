@@ -32,7 +32,7 @@ df_articles = pd.DataFrame()
 
 a = 2000
 b = 7000
-for i in range (a,b):
+for i in range(a, b):
     with open(os.getcwd()+"/data/articles_7250/article_%s.txt"%i, "r") as article:
         data = article.read()  
          
@@ -126,6 +126,6 @@ for i in range (a,b):
             }
     
     df_articles = df_articles.append(dict_data, ignore_index=True)
-    print ((i/b)*100,"%")
+    print ((i/b)*100, "%")
 print (df_articles)
 df_articles.to_csv(r'data/df/df_articles_9.csv')

@@ -21,7 +21,7 @@ list_v = []
 df = pd.read_csv(os.getcwd()+"/data/df/df_articles_v.csv")
 
 list_content = df['6_CONTENT'].tolist()
-print (len(list_content))
+print(len(list_content))
 
 
 documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(list_content)]
