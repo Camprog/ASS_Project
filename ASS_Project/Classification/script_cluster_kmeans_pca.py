@@ -43,7 +43,7 @@ pca.fit(X)
 # Get list of PC's
 pca.components_
 # Transform the model to data 
-te=pca.transform(X)
+te = pca.transform(X)
 print(te)
 # Get the eigenvalues
 #pca.explained_variance_ratio
@@ -59,7 +59,7 @@ centers = kmeans.cluster_centers_
 
 #nmbre cluster
 
-t=[]
+t = []
 for k in y_kmeans:
         if not k in t:
             t.append(k)

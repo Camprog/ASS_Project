@@ -7,19 +7,17 @@ Created on Sun Nov 17 19:33:22 2019
 
 
 import matplotlib.pyplot as plt
-
-from sklearn.datasets.samples_generator import make_blobs
-
-from numpy import genfromtxt,loadtxt
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
+from fcmeans import FCM
+
 
 #data = np.loadtxt('Vecteurs.csv', delimiter=';', skiprows=1)
-data = np.loadtxt('Vecteurs_3_300.csv', delimiter=',',skiprows=1)
+data = np.loadtxt('Vecteurs_3_300.csv', delimiter=',', skiprows=1)
 
 print(data.shape)
-X=data
+X = data
 X = StandardScaler().fit_transform(X)
 
 #
@@ -49,9 +47,6 @@ print(te)
 #pca.explained_variance_ratio
 #test
 
-
-from fcmeans import FCM
-
 # fit the fuzzy-c-means
 fcm = FCM(n_clusters=3)
 fcm.fit(te)
@@ -64,7 +59,7 @@ y_kmeans = fcm.u.argmax(axis=1)
 
 #nmbre cluster
 
-t=[]
+t = []
 for k in y_kmeans:
         if not k in t:
             t.append(k)
@@ -74,4 +69,4 @@ print("nbr clust : "+str(len(t)))
 #fin nmbre cluster
 
 plt.scatter(te[:, 0], te[:, 1], c=y_kmeans, s=50, cmap='viridis')
-plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5);
+plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)

@@ -12,11 +12,9 @@ from keras.models import Model
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
-data = np.loadtxt('Vecteurs_3_300.csv', delimiter=',',skiprows=1)
-#
-#print(data.shape)
-X=data
+X = np.loadtxt('Vecteurs_3_300.csv', delimiter=',',skiprows=1)
 train = StandardScaler().fit_transform(X)
 
 encoding_dim = 2
@@ -28,21 +26,19 @@ decoded = Dense(train.shape[1], activation='sigmoid')(encoded)
 autoencoder = Model(input_layer, decoded)
 autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
 
-from sklearn.model_selection import train_test_split
-#X1, X2, Y1, Y2 = train_test_split(train, train, test_size=0.2, random_state=42)
+X1, X2, Y1, Y2 = train_test_split(train, train, test_size=0.2, random_state=42)
 
 # these parameters seems to work for the Mercedes dataset
 autoencoder.fit(train, train,
                 epochs=300,
                 batch_size=200,
                 shuffle=False,
-                verbose = 2,
+                verbose=2,
                 validation_data=(X2, Y2))
 
 # now let's evaluate the coding of the initial features
 encoder = Model(input_layer, encoded)
 preds = encoder.predict(train)
-
 
 
 # Compute DBSCAN
