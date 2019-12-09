@@ -23,8 +23,8 @@ log = logging.getLogger("ass.mining")
 
 log.setLevel(logging.INFO)
 ass_log.setLevel(logging.WARNING)
-filter_log.setLevel(logging.INFO)
-miner_log.setLevel(logging.INFO)
+filter_log.setLevel(logging.WARNING)
+miner_log.setLevel(logging.WARNING)
 
 #%% Main cell
 
@@ -50,12 +50,12 @@ tfidf_corpus: dict = ass_miner.tfidf()
 mw: dict = {}
 min_tfidf = 0
 for a in tfidf_corpus:
-    log.info("Trying to keep 100 highest TF-IDF for article " + a.title())
+    log.debug("Trying to keep 100 highest TF-IDF for article " + a.title())
     sorted_tfidf = dict(sorted(tfidf_corpus[a].items(), key=operator.itemgetter(1), reverse=True))
-    log.info("=> " + str(list(sorted_tfidf.items())[:best_tfidf]))
+    log.debug("=> " + str(list(sorted_tfidf.items())[:best_tfidf]))
     if mw:
         sorted_tfidf = dict(filter(lambda kv: kv[1] > min_tfidf, sorted_tfidf.items()))
-        log.info("filter tf-idf higher than " + str(min_tfidf))
+        log.debug("filter tf-idf higher than " + str(min_tfidf))
         sorted_new_tfidf: dict = {}
         for ww in set(mw.keys()).intersection(set(sorted_tfidf.keys())):
             sorted_new_tfidf[ww] = sorted_tfidf[ww] if ww not in mw or sorted_tfidf[ww] > mw[ww] else mw[ww]
@@ -65,8 +65,8 @@ for a in tfidf_corpus:
     else:
         mw = sorted_tfidf
     mw_tmp = list(mw.items())[:best_tfidf]
-    log.info("Temporary MW > "+str(mw))
-    log.info("Sorted and cut MW "+str(mw_tmp))
+    log.debug("Temporary MW > "+str(mw))
+    log.debug("Sorted and cut MW "+str(mw_tmp))
     # log.info("Min TF-IDF is : "+str(mw_tmp[-1]))
     min_tfidf = mw_tmp[-1][1]
     mw = dict(mw_tmp)

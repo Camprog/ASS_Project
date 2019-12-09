@@ -158,6 +158,6 @@ class ASSMiner:
     def display_topics(model, feature_names, no_top_words):
         result: str = ""
         for topic_idx, topic in enumerate(model.components_):
-            result += "Topic %d:" % topic_idx
+            result += "\nTopic %d:" % topic_idx
             result += " ".join([feature_names[i] for i in topic.argsort()[:-no_top_words - 1:-1]])
         return result
