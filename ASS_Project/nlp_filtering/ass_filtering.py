@@ -3,6 +3,7 @@ import re
 import pandas
 
 from ASS_Project.article_scrap.ass_article import ASSArticle
+import ASS_Project.Doc2vec.built_df as bdf
 
 log = logging.getLogger("filtering")
 log.setLevel(logging.INFO)
@@ -67,7 +68,8 @@ class ASSFilter:
         """
         Private method to filter DataFrame according to the score of row based article
         """
-        labels = labels if labels else [TITLE, ABSTRACT, CONTENT]
+        authorized_tag = [bdf.TITLE_TAG, bdf.ABSTRACT_TAG, bdf.CONTENT_TAG]
+        labels = labels if all(t in labels for t in authorized_tag) else authorized_tag
         for i, row in df_articles.iterrows():
             score = sum(self.get_meta_score(TAG) for TAG in labels)
             if score > score_threshold:

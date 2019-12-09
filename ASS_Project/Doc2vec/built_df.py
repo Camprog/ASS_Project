@@ -25,6 +25,14 @@ Add in data folder a folder named "df" and create df_articles.csv in df folder
 
 ############
 """
+
+DOI_TAG = "1_DOI"
+ISSN_TAG = "2_ISSN"
+TITLE_TAG = "3_TITLE"
+ABSTRACT_TAG = "5_ABSTRACT"
+CONTENT_TAG = "6_CONTENT"
+KEYWORD_TAG = "4_KEYWORDS"
+
 stop_words = set(stopwords.words('english'))
 
 mon_dictionnaire = {}
@@ -117,13 +125,13 @@ for i in range(a, b):
     except :
         abstract_raw = "none"     
 
-    dict_data= {"1_DOI" : DOI_raw,
-            "2_ISSN" : ISSN_raw,
-            "3_TITLE" : title_raw, 
-            "5_ABSTRACT" : abstract_raw,
-            "6_CONTENT" : content_raw,
-            "4_KEYWORDS" : kw_raw
-            }
+    dict_data = {DOI_TAG: DOI_raw,
+                 ISSN_TAG: ISSN_raw,
+                 TITLE_TAG: title_raw,
+                 ABSTRACT_TAG : abstract_raw,
+                 CONTENT_TAG : content_raw,
+                 KEYWORD_TAG : kw_raw
+                 }
     
     df_articles = df_articles.append(dict_data, ignore_index=True)
     print ((i/b)*100, "%")
