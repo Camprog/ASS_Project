@@ -8,6 +8,7 @@ from ass_constant import TITLE_TAG as TITLE
 from ass_constant import ABSTRACT_TAG as ABSTRACT
 from ass_constant import CONTENT_TAG as CONTENT
 from ass_constant import ISSN_TAG as ISSN
+from ass_constant import VECTOR_TAG as VECTOR
 
 log = logging.getLogger("filtering")
 log.setLevel(logging.INFO)
@@ -70,12 +71,12 @@ class ASSFilter:
         """
         authorized_tag = [TITLE, ABSTRACT, CONTENT]
         labels = labels if all(t in labels for t in authorized_tag) else authorized_tag
-        score_df = pandas.DataFrame(columns=[ISSN, CONTENT, SCORE])
+        score_df = pandas.DataFrame(columns=[ISSN, CONTENT, VECTOR, SCORE])
         for i, row in df_articles.iterrows():
             score = sum(self.get_match_score(row[TAG], TAG) for TAG in labels if isinstance(row[TAG], str)
                         and row[TAG].strip())
             if score > score_threshold:
-                new_row: dict = {ISSN: row[ISSN], CONTENT: row[CONTENT], SCORE: score}
+                new_row: dict = {ISSN: row[ISSN], CONTENT: row[CONTENT], VECTOR: row[VECTOR], SCORE: score}
                 score_df = score_df.append(new_row, ignore_index=True)
         log.debug("Filtered DF of size "+str(len(score_df.index))+" have score "+str(score_df[SCORE])+" length")
         article_ratio = int(len(df_articles.index) * score_ratio)

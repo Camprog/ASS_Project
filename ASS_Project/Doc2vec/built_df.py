@@ -128,12 +128,12 @@ for i in range(a, b):
     dict_data = {DOI: DOI_raw,
                  ISSN: ISSN_raw,
                  TITLE: title_raw,
-                 ABSTRACT : abstract_raw,
-                 CONTENT : content_raw,
-                 KEYWORD : kw_raw
+                 ABSTRACT: abstract_raw,
+                 CONTENT: content_raw,
+                 KEYWORD: kw_raw
                  }
     
     df_articles = df_articles.append(dict_data, ignore_index=True)
-    print ((i/b)*100, "%")
-print (df_articles)
+    print((i/b)*100, "%")
+print(df_articles)
 df_articles.to_csv(r'data/df/df_articles_9.csv')
