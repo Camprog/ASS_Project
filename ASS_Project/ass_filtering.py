@@ -5,10 +5,11 @@ from article_scrap.ass_article import ASSArticle
 
 from nlp_filtering.ass_filtering import log as filter_log
 from nlp_filtering.ass_filtering import ASSFilter
+from nlp_filtering.ass_filtering import SCORE
 
 import os
 import glob
-from pathlib import Path
+import pandas
 
 logging.basicConfig()
 log = logging.getLogger("ass.filter")
@@ -21,17 +22,22 @@ filter_log.setLevel(logging.DEBUG)
 data_folder = os.getcwd() + "/data"
 files = [f for f in glob.glob(data_folder + "/*.txt")]
 
-ass_filter = ASSFilter("Synthetic population", 5, "Multi-agent simulation", 1,
-                       "micro simulation", 1, "agent initialization", 3)
+df_file = "df_vecteur_revu.csv"
+file = data_folder+"/"+df_file if df_file else ""
 
-filtered_articles = ass_filter.filter([ASSArticle(open(f)) for f in files])
+ass_filter = ASSFilter("Synthetic population", 5, "demographic data", 3, "simulation initialization", 2)
 
-print("There is "+str(len(filtered_articles))+" article that match filter")
+if file == "":
+    filtered_articles = ass_filter.filter([ASSArticle(open(f)) for f in files])
+    print("There is " + str(len(filtered_articles)) + " article that match filter")
 
-i = 1
-for a in [x[0] for x in filtered_articles]:
-    print(a.title(), ass_filter.get_score(a))
-    res_file = data_folder+"/filtered/fa_"+str(i)+".txt"
-    os.makedirs(os.path.dirname(res_file), exist_ok=True)
-    a.save(res_file)
-    i += 1
+    i = 1
+    for a in [x[0] for x in filtered_articles]:
+        print(a.title(), ass_filter.get_score(a))
+        res_file = data_folder + "/filtered/fa_" + str(i) + ".txt"
+        os.makedirs(os.path.dirname(res_file), exist_ok=True)
+        a.save(res_file)
+        i += 1
+else:
+    filtered_articles = ass_filter.filter(pandas.read_csv(file).head(100))
+    print(filtered_articles[SCORE].to_string(index=False))

@@ -3,14 +3,14 @@ import re
 import pandas
 
 from ASS_Project.article_scrap.ass_article import ASSArticle
-import ASS_Project.Doc2vec.built_df as bdf
+
+from ass_constant import TITLE_TAG as TITLE
+from ass_constant import ABSTRACT_TAG as ABSTRACT
+from ass_constant import CONTENT_TAG as CONTENT
+from ass_constant import ISSN_TAG as ISSN
 
 log = logging.getLogger("filtering")
 log.setLevel(logging.INFO)
-
-TITLE = "title"
-ABSTRACT = "abstract"
-CONTENT = "content"
 
 SCORE = "SCORE"
 DISTANCE_COEFFICIENT = "match_distance_coefficient"
@@ -68,15 +68,20 @@ class ASSFilter:
         """
         Private method to filter DataFrame according to the score of row based article
         """
-        authorized_tag = [bdf.TITLE_TAG, bdf.ABSTRACT_TAG, bdf.CONTENT_TAG]
+        authorized_tag = [TITLE, ABSTRACT, CONTENT]
         labels = labels if all(t in labels for t in authorized_tag) else authorized_tag
+        score_df = pandas.DataFrame(columns=[ISSN, CONTENT, SCORE])
         for i, row in df_articles.iterrows():
-            score = sum(self.get_meta_score(TAG) for TAG in labels)
+            score = sum(self.get_match_score(row[TAG], TAG) for TAG in labels if isinstance(row[TAG], str)
+                        and row[TAG].strip())
             if score > score_threshold:
-                row[SCORE] = score
+                new_row: dict = {ISSN: row[ISSN], CONTENT: row[CONTENT], SCORE: score}
+                score_df = score_df.append(new_row, ignore_index=True)
+        log.debug("Filtered DF of size "+str(len(score_df.index))+" have score "+str(score_df[SCORE])+" length")
         article_ratio = int(len(df_articles.index) * score_ratio)
         article_ratio = article_ratio if (article_count == 0 or article_count > article_ratio) else article_count
-        return df_articles.sort_values(SCORE, ascending=False).head(article_ratio)
+        return score_df.sort_values(SCORE, ascending=False).head(article_ratio) if len(score_df.index) > article_ratio \
+            else score_df
 
     def get_score(self, article):
         """
@@ -90,7 +95,7 @@ class ASSFilter:
             abstract = article.abstract()
             content = article.text()
         except RuntimeError:
-            raise ValueError("Provided article is not a "+str(ASSArticle))
+            raise ValueError("Provided article is not a " + str(ASSArticle))
         return self.get_match_score(title, TITLE) * self._score_matrix[TITLE] + \
                self.get_match_score(abstract, ABSTRACT) * self._score_matrix[ABSTRACT] + \
                self.get_match_score(content, CONTENT) * self._score_matrix[CONTENT]
