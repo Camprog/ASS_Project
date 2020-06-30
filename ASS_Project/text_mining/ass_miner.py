@@ -1,7 +1,10 @@
 from article_scrap.ass_article import ASSArticle
+from ass_constant import CONTENT_TAG as CONTENT
 
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
+
+from pandas import DataFrame
 
 import pandas
 import re
@@ -32,6 +35,8 @@ class ASSMiner:
     """
 
     _articles: list = []
+    _df: DataFrame
+
     _asstfidf: str
     _asslang: str
     _assfeat: int
@@ -46,7 +51,10 @@ class ASSMiner:
         :param language: the language for stop-word dictionary based removal (also lem/stem)
         :param feature_ratio: the ratio of word of interest (best n * feature_ratio kept)
         """
-        self._articles = articles
+        if isinstance(articles, DataFrame):
+            self._df = articles
+        else:
+            self._articles = articles
         self._asstfidf = tfidf
         self._asslang = language
         self._assfeat = int(sum(len(a.text().split()) for a in articles) * feature_ratio)
@@ -85,22 +93,32 @@ class ASSMiner:
         :param articles: the set of articles to explore
         :return: a dictionary made as follow => [article : [word : tf-idf]]
         """
+        labels: list = []
+        l_texts: list = []
+        if isinstance(texts, DataFrame):
+            for i, row in texts.iterrows():
+                labels.append(i)
+                l_texts.append(row[CONTENT])
+        else:
+            l_texts = texts
+            labels = range(len(texts)) if not labels else labels
+
         ass_dict = {}  # Article :: list of words
         tfidf_dict = {}  # Article :: [word :: tf-idf]
         words = []  # All words
-        labels = range(len(texts)) if not labels else labels
+
         # Set article words and total set of words
-        for a, l in zip(texts, labels):
+        for a, l in zip(l_texts, labels):
             ass_dict[l] = a.split()
             words = set(words).union(set(ass_dict[l]))
 
-        log.debug("Word dictionary contains "+str(len(words))+" words for "+str(len(texts))+" articles")
+        log.debug("Word dictionary contains "+str(len(words))+" words for "+str(len(l_texts))+" articles")
 
         # Compute IDF for the entire corpus
         idf_dict = ASSMiner._idf(ass_dict.values(), words)
 
         # compute TF for each article
-        for a, l in zip(texts, labels):
+        for a, l in zip(l_texts, labels):
             tfidf_dict[l] = ASSMiner._tfidf(idf_dict, ass_dict[l])
 
         return tfidf_dict
@@ -148,7 +166,13 @@ class ASSMiner:
         """
         mf = features if features > 0 else self._assfeat
         tf_vectorizer = CountVectorizer(max_df=0.95, min_df=2, max_features=mf, stop_words=self._asslang)
-        tf = tf_vectorizer.fit_transform([a.text() for a in self._articles])
+
+        texts: list = []
+        if self._articles:
+            texts = [a.text() for a in self._articles]
+        else:
+            texts = self._df[CONTENT].tolist()
+        tf = tf_vectorizer.fit_transform(texts)
         self.ass_feat_name = tf_vectorizer.get_feature_names()
         return LatentDirichletAllocation(n_components=topics, max_iter=5, learning_method='online', learning_offset=50.,
                                         random_state=0).fit(tf)

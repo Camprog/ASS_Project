@@ -4,19 +4,23 @@ from article_scrap.ass_article import ASSArticle
 from nlp_filtering.ass_filtering import log as filter_log
 from nlp_filtering.ass_filtering import ASSFilter
 
-
 from text_mining.ass_miner import ASSMiner
 from text_mining.ass_miner import log as miner_log
 import logging
 
 from random import sample
 
+from progressbar import ProgressBar as PB
+
 import os
 import glob
 
 import operator
 
-import re
+import pandas
+
+from ass_constant import CONTENT_TAG as CONTENT
+from ass_constant import CLUSTER_TAG as CLUSTER
 
 logging.basicConfig()
 log = logging.getLogger("ass.mining")
@@ -25,6 +29,47 @@ log.setLevel(logging.INFO)
 ass_log.setLevel(logging.WARNING)
 filter_log.setLevel(logging.WARNING)
 miner_log.setLevel(logging.WARNING)
+
+rivf_article = True
+
+data_folder = os.getcwd() + "/data"
+file = data_folder+"/df_ISSN_CONTENT_pred.csv"
+
+df = pandas.read_csv(file)
+
+# Define tdidf
+
+tfidf_top = 20
+tfidf_clust: dict = {}
+tfidf = ASSMiner._ass_tfidf(df)
+
+# Compute tfidf per clusters
+count = float(len(df.index))
+for i, row in PB.progressbar(df.iterrows()):
+    cluster = df.loc[df.index[i], CLUSTER]
+    tops_i = dict(sorted(tfidf[i].items(), key=operator.itemgetter(1), reverse=True)[:tfidf_top])
+    if cluster in tfidf_clust.keys():
+        top_c = tfidf_clust[cluster]
+        for nw, nn in tops_i.items():
+            if nw in top_c.keys():
+                top_c[nw] += nn
+            else:
+                top_c.update({nw: nn})
+    else:
+        tfidf_clust[cluster] = {w: n for w, n in tops_i.items()}
+    if i % count/10:
+        print()
+
+for c, t in PB.progressbar(tfidf_clust.items()):
+    print(c, str(sorted(t.items(), key=operator.itemgetter(1), reverse=True)[:tfidf_top]))
+
+# Define lda
+miner = ASSMiner(df)
+lda = miner.ass_lda(len(tfidf_clust.keys()))
+print(ASSMiner.display_topics(lda, miner.ass_feat_name, tfidf_top))
+
+if rivf_article:
+    exit()
 
 #%% Main cell
 
@@ -77,3 +122,4 @@ log.info(mw)
 log.info("Now move to LDA: ")
 lda = ass_miner.ass_lda(5)
 log.info(ASSMiner.display_topics(lda, ass_miner.ass_feat_name, 4))
+

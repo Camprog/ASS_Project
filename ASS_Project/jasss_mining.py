@@ -11,6 +11,7 @@ from requests import HTTPError
 import bs4
 import os
 import logging
+from doi2bib.crossref import get_bib
 from re import findall as fall
 
 from pathlib import Path
@@ -29,6 +30,7 @@ req_text = request.urlopen(url=url_JASSS).read()
 
 page = bs4.BeautifulSoup(req_text, "lxml")
 
+bibsave = True
 itr = 0
 rvw = 0
 nb_max = len(page.findAll("p", {'class': 'item'}))
@@ -38,10 +40,10 @@ tp = Path(os.getcwd() + "/data")
 
 rtcl = [4, 1, 1]
 
-#no_doi_article = [12, 4, 13]
+# no_doi_article = [12, 4, 13]
 
-#the_old_article = JasssArticle(rtcl[0], rtcl[1], rtcl[2])
-#the_old_article.save(str(tp)+"/test_old_article.txt")
+# the_old_article = JasssArticle(rtcl[0], rtcl[1], rtcl[2])
+# the_old_article.save(str(tp)+"/test_old_article.txt")
 
 goon = True
 for gen in page.findAll("p", {'class': 'item'}):
@@ -55,7 +57,7 @@ for gen in page.findAll("p", {'class': 'item'}):
     if goon:
         continue
 
-    prop = round(itr/nb_max*100, 4)
+    prop = round(itr / nb_max * 100, 4)
     log.info(str(prop) + "% => " + url_article + " | " + str(url_issue) + " review = " + str(rvw))
     try:
         article = JasssArticle(url=url_article)
@@ -69,6 +71,17 @@ for gen in page.findAll("p", {'class': 'item'}):
     doi = article.doi()
     res_file = str(tp) + "/JASSS_" + doi_converter(doi) + ".txt"
     os.makedirs(os.path.dirname(res_file), exist_ok=True)
+    bib_file = str(tp) + "/JASSS_bib.txt"
+    os.makedirs(os.path.dirname(bib_file), exist_ok=True)
+
+    if bibsave:
+        bibrefweb = get_bib(doi)
+        print(doi)
+        print(bibrefweb)
+        if bibrefweb[0]:
+            f = open(bib_file, "a")
+            f.write(bibrefweb[1])
+            f.close()
 
     article.save(res_file)
     if (itr % 10000000) == 0:

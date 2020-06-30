@@ -9,10 +9,9 @@ from requests import HTTPError
 
 from article_scrap import ass_scrap_util
 
-from article_scrap import ass_scrap_util
-from article_scrap.ass_scrap_util import text_cleaner
 import re
 import unicodedata
+import biblib
 
 import logging
 
@@ -63,6 +62,19 @@ class ASSArticle:
     @abstractmethod
     def text(self):
         return self._content
+
+    def get_bib(self):
+        """
+        Turn this article into a string bibtex reference
+        :return: a string representation of the article as a bib reference
+        """
+        a = biblib.entry_from_doi(self.doi())
+        a.set_tag('author', self.author())
+        a.set_tag('title',  self.title())
+        a.set_tag('journal', self.journal())
+        a.set_tag('year', self.year())
+
+
 
     def save(self, res_file):
         file = open(res_file, "w")
@@ -291,7 +303,6 @@ class JasssArticle(ASSArticle):
         :param tag: the part of the article to look for (default = 'title')
         :return: a string representation of requested part of the article
         """
-
 
     def get_soup(self):
         """

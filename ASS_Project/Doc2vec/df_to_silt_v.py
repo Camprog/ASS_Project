@@ -14,38 +14,46 @@ import csv
 
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
-
-
  
 list_v = []
-df = pd.read_csv(os.getcwd()+"/data/df/df_articles_v.csv")
+df = pd.read_csv(os.getcwd()+"/../data/df_vecteur_revu.csv")
 
 list_content = df['6_CONTENT'].tolist()
 print(len(list_content))
 
+new_list_content: list = []
+for i, c in enumerate(list_content):
+    if len(c.split()) < 200 or not isinstance(c, str):
+        print(str(i)+" = "+c+" "+str(c.__class__))
+    else:
+        new_list_content.append(c)
 
-documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(list_content)]
+print(str(len(list_content)-len(new_list_content))+" deleted items")
+
+documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(new_list_content)]
 
 model = Doc2Vec(documents, vector_size=25, window=2, min_count=1, workers=4)
 
-X=[]
-print("phase_3")
-
-for i in range(len(list_content)):
-    try:
-        X.append(model.docvecs[i])
-        liste_vecteur = list(model.docvecs[i])
-        list_v.append(liste_vecteur)
-        #print (i,"vectors")
-    except:
-        list_v.append(list("none"))
-        #print(i, "errors")
-        continue
-
-
-df['7_VECTORS'] = list_v  
-df.to_csv(r'data/df/df_vecteur_revu.csv') 
-print(list_v)
+print("DONE !")
+#
+# X=[]
+# print("phase_3")
+#
+# for i in range(len(list_content)):
+#     try:
+#         X.append(model.docvecs[i])
+#         liste_vecteur = list(model.docvecs[i])
+#         list_v.append(liste_vecteur)
+#         #print (i,"vectors")
+#     except:
+#         list_v.append(list("none"))
+#         #print(i, "errors")
+#         continue
+#
+#
+# df['7_VECTORS'] = list_v
+# df.to_csv(r'data/df/df_vecteur_revu.csv')
+# print(list_v)
 
 
     

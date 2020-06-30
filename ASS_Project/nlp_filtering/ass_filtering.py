@@ -69,7 +69,7 @@ class ASSFilter:
         """
         Private method to filter DataFrame according to the score of row based article
         """
-        authorized_tag = [TITLE, ABSTRACT, CONTENT]
+        authorized_tag = [CONTENT] #[TITLE, ABSTRACT, CONTENT]
         labels = labels if all(t in labels for t in authorized_tag) else authorized_tag
         score_df = pandas.DataFrame(columns=[ISSN, CONTENT, VECTOR, SCORE])
         for i, row in df_articles.iterrows():
